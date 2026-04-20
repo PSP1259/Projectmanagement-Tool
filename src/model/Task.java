@@ -7,7 +7,6 @@ package model;
  */
 public class Task {
 
-    // encapsulation
     private String title;
     private String description;
     private String status;
