@@ -20,6 +20,7 @@ public class MainView extends JFrame {
     private final JButton addButton;
     private final JButton deleteButton;
     private final JButton toggleStatusButton;
+    private final JLabel progressLabel;
 
 
     public MainView() {
@@ -29,6 +30,10 @@ public class MainView extends JFrame {
         setSize(500, 400);
         setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
         setLayout(new BorderLayout());
+
+        progressLabel = new JLabel("Progress: 0 of 0 Tasks Done", SwingConstants.CENTER);
+        progressLabel.setFont(new Font("Arial", Font.BOLD, 16));
+        add(progressLabel, BorderLayout.NORTH);
 
         // 2. Central Component: non-editable JTextArea wrapped in a JScrollPane
         taskTextArea = new JTextArea(20, 30);
@@ -104,10 +109,21 @@ public class MainView extends JFrame {
      * @param tasks List of Task objects provided by the Model.
      */
     public void updateTaskList(ArrayList<Task> tasks) {
+
         taskTextArea.setText("");
 
+        int totalTasks = tasks.size();
+        int doneTasks = 0;
+
         for (Task t : tasks) {
+            if (t.getStatus().equals("Done")) {
+                doneTasks++;
+            }
+
             taskTextArea.append(t.toString() + "\n");
         }
+
+        // Update the progress label at the top of the window
+        progressLabel.setText("Progress: " + doneTasks + " of " + totalTasks + " Tasks Done");
     }
 }
