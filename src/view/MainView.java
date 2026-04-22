@@ -19,6 +19,8 @@ public class MainView extends JFrame {
     private final JTextField descriptionField;
     private final JButton addButton;
     private final JButton deleteButton;
+    private final JButton toggleStatusButton;
+
 
     public MainView() {
 
@@ -58,6 +60,9 @@ public class MainView extends JFrame {
         deleteButton = new JButton("Delete Task");
         buttonPanel.add(deleteButton);
 
+        toggleStatusButton = new JButton("Toggle Status");
+        buttonPanel.add(toggleStatusButton);
+
         bottomPanel.add(inputPanel, BorderLayout.CENTER);
         bottomPanel.add(buttonPanel, BorderLayout.SOUTH);
 
@@ -74,6 +79,10 @@ public class MainView extends JFrame {
 
     public JButton getDeleteButton() {
         return deleteButton;
+    }
+
+    public JButton getToggleStatusButton() {
+        return toggleStatusButton;
     }
 
     public String getTitleInput() {

@@ -61,6 +61,7 @@ public class ProjectModel {
      * @param title The title of the task to be removed.
      */
     public void removeTaskByTitle(String title) {
+
         ArrayList<Task> oldTasks = new ArrayList<>(this.tasks);
 
         for (int i = 0; i < tasks.size(); i++) {
@@ -75,5 +76,32 @@ public class ProjectModel {
 
         // Notify View
         pcs.firePropertyChange("tasks", oldTasks, this.tasks);
+    }
+
+    /**
+     * Search the task from the list based on its title and changes the status between "Open" and "Done".
+     * Automatically saves the updated list to XML.
+     * @param title The title of the task to be adjusted.
+     */
+    public void toggleTaskStatus(String title) {
+        boolean taskFound = false;
+
+        for (Task t : tasks) {
+            if (t.getTitle().equalsIgnoreCase(title.trim())) {
+                if (t.getStatus().equals("Open")) {
+                    t.setStatus("Done");
+                } else {
+                    t.setStatus("Open");
+                }
+                taskFound = true;
+                break;
+            }
+        }
+
+        // Only save and notify if we actually changed something
+        if (taskFound) {
+            utils.DataStorage.saveTasks(this.tasks);
+            pcs.firePropertyChange("tasks", null, this.tasks);
+        }
     }
 }
