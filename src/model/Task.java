@@ -51,6 +51,6 @@ public class Task {
 
     @Override
     public String toString() {
-        return title + " :" + status;
+        return title + ": " + status;
     }
 }
