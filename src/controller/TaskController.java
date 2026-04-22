@@ -37,6 +37,7 @@ public class TaskController implements PropertyChangeListener {
 
         this.model.addPropertyChangeListener(this);
         this.view.getAddButton().addActionListener((ActionEvent e) -> handleAddTask());
+        this.view.getDeleteButton().addActionListener((ActionEvent e) -> handleDeleteTask());
 
         // INITIAL LOAD LOGIC
         // 1. Load existing tasks from the XML file
@@ -69,6 +70,18 @@ public class TaskController implements PropertyChangeListener {
         model.addTask(newTask);
 
         view.clearInputs();
+    }
+
+    /**
+     * Opens an input dialog to ask for the task title and tells the model to remove it.
+     */
+    private void handleDeleteTask() {
+
+        String titleToDelete = JOptionPane.showInputDialog(view, "Enter the exact title of the task to delete:");
+
+        if (titleToDelete != null && !titleToDelete.trim().isEmpty()) {
+            model.removeTaskByTitle(titleToDelete);
+        }
     }
 
     /**

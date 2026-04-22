@@ -54,4 +54,26 @@ public class ProjectModel {
     public void addPropertyChangeListener(PropertyChangeListener listener) {
         pcs.addPropertyChangeListener(listener);
     }
+
+    /**
+     * Removes a task from the list based on its title.
+     * Automatically saves the updated list to XML.
+     * @param title The title of the task to be removed.
+     */
+    public void removeTaskByTitle(String title) {
+        ArrayList<Task> oldTasks = new ArrayList<>(this.tasks);
+
+        for (int i = 0; i < tasks.size(); i++) {
+            if (tasks.get(i).getTitle().equalsIgnoreCase(title)) {
+                tasks.remove(i);
+                break;
+            }
+        }
+
+        // Save changes to XML
+        utils.DataStorage.saveTasks(this.tasks);
+
+        // Notify View
+        pcs.firePropertyChange("tasks", oldTasks, this.tasks);
+    }
 }

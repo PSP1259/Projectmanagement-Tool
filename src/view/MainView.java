@@ -18,6 +18,7 @@ public class MainView extends JFrame {
     private final JTextField titleField;
     private final JTextField descriptionField;
     private final JButton addButton;
+    private final JButton deleteButton;
 
     public MainView() {
 
@@ -34,7 +35,11 @@ public class MainView extends JFrame {
         add(scrollPane, BorderLayout.CENTER);
 
         // 3. South Input Container JPanel:
-        JPanel inputPanel = new JPanel(new GridLayout(3, 2, 5, 5));
+        JPanel bottomPanel = new JPanel();
+        bottomPanel.setLayout(new BorderLayout());
+
+        JPanel inputPanel = new JPanel();
+        inputPanel.setLayout(new GridLayout(2, 2, 5, 5));
 
         inputPanel.add(new JLabel("Title:"));
         titleField = new JTextField();
@@ -44,21 +49,31 @@ public class MainView extends JFrame {
         descriptionField = new JTextField();
         inputPanel.add(descriptionField);
 
-        inputPanel.add(new JLabel(""));         // empty placeholder
-        addButton = new JButton("Add Task");
-        inputPanel.add(addButton);
+        JPanel buttonPanel = new JPanel();
+        buttonPanel.setLayout(new FlowLayout(FlowLayout.RIGHT));
 
-        add(inputPanel, BorderLayout.SOUTH);
+        addButton = new JButton("Add Task");
+        buttonPanel.add(addButton);
+
+        deleteButton = new JButton("Delete Task");
+        buttonPanel.add(deleteButton);
+
+        bottomPanel.add(inputPanel, BorderLayout.CENTER);
+        bottomPanel.add(buttonPanel, BorderLayout.SOUTH);
+
+        add(bottomPanel, BorderLayout.SOUTH);
     }
 
     // --- Public interface (View API) for the Controller ---
 
-    /**
-     * Used by the Controller to register an ActionListener.
-     * @return JButton representing the "Add Task" action.
-     */
+    //Used by the Controller to register an ActionListener.
+
     public JButton getAddButton() {
         return addButton;
+    }
+
+    public JButton getDeleteButton() {
+        return deleteButton;
     }
 
     public String getTitleInput() {
