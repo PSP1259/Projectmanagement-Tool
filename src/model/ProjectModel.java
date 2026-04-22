@@ -57,51 +57,64 @@ public class ProjectModel {
 
     /**
      * Removes a task from the list based on its title.
-     * Automatically saves the updated list to XML.
+     *
      * @param title The title of the task to be removed.
      */
     public void removeTaskByTitle(String title) {
+        Task taskToRemove = findTaskByTitle(title);
 
-        ArrayList<Task> oldTasks = new ArrayList<>(this.tasks);
+        if (taskToRemove != null) {
+            tasks.remove(taskToRemove);
 
-        for (int i = 0; i < tasks.size(); i++) {
-            if (tasks.get(i).getTitle().equalsIgnoreCase(title)) {
-                tasks.remove(i);
-                break;
-            }
-        }
-
-        // Save changes to XML
-        utils.DataStorage.saveTasks(this.tasks);
-
-        // Notify View
-        pcs.firePropertyChange("tasks", oldTasks, this.tasks);
-    }
-
-    /**
-     * Search the task from the list based on its title and changes the status between "Open" and "Done".
-     * Automatically saves the updated list to XML.
-     * @param title The title of the task to be adjusted.
-     */
-    public void toggleTaskStatus(String title) {
-        boolean taskFound = false;
-
-        for (Task t : tasks) {
-            if (t.getTitle().equalsIgnoreCase(title.trim())) {
-                if (t.getStatus().equals("Open")) {
-                    t.setStatus("Done");
-                } else {
-                    t.setStatus("Open");
-                }
-                taskFound = true;
-                break;
-            }
-        }
-
-        // Only save and notify if we actually changed something
-        if (taskFound) {
+            // Since the list structure actually changed (an item was removed),
+            // we can trigger the standard property change event.
             utils.DataStorage.saveTasks(this.tasks);
             pcs.firePropertyChange("tasks", null, this.tasks);
         }
     }
+
+    /**
+     * Toggles the status of a task between "Open" and "Done".
+     *
+     * @param title The title of the task to toggle.
+     */
+    public void toggleTaskStatus(String title) {
+
+        Task taskToToggle = findTaskByTitle(title);
+
+        if (taskToToggle != null) {
+            if (taskToToggle.getStatus().equals("Open")) {
+                taskToToggle.setStatus("Done");
+            } else {
+                taskToToggle.setStatus("Open");
+            }
+
+            forceUpdateAndSave();
+        }
+    }
+
+    /**
+     * Force an update in the View and save the data
+     * Used when the properties of an existing task have changed (e.g., time has been logged).
+     */
+    public void forceUpdateAndSave() {
+        utils.DataStorage.saveTasks(this.tasks);
+        pcs.firePropertyChange("tasks", null, this.tasks);
+    }
+
+    /**
+     * Searches for a task in the list by its exact title (case-insensitive).
+     *
+     * @param title The title of the task to find.
+     * @return The Task object if found, or null if no task matches the title.
+     */
+    public Task findTaskByTitle(String title) {
+        for (Task t : tasks) {
+            if (t.getTitle().equalsIgnoreCase(title.trim())) {
+                return t;
+            }
+        }
+        return null;
+    }
+
 }

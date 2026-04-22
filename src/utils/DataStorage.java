@@ -31,10 +31,10 @@ public class DataStorage {
         // Convert the ArrayList into key-value pairs for the Properties object
         for (int i = 0; i < tasks.size(); i++) {
             Task t = tasks.get(i);
-            // We use a prefix like "task.0.title" to keep keys unique
             props.setProperty("task." + i + ".title", t.getTitle());
             props.setProperty("task." + i + ".description", t.getDescription());
             props.setProperty("task." + i + ".status", t.getStatus());
+            props.setProperty("task." + i + ".time", String.valueOf(t.getTimeSpentInSeconds()));
         }
 
         // Save the total count
@@ -78,7 +78,10 @@ public class DataStorage {
                 String description = props.getProperty("task." + i + ".description", "");
                 String status = props.getProperty("task." + i + ".status", "Open");
 
-                loadedTasks.add(new Task(title, description, status));
+                String timeStr = props.getProperty("task." + i + ".time", "0");
+                int time = Integer.parseInt(timeStr);
+
+                loadedTasks.add(new Task(title, description, status, time));
             }
         } catch (IOException e) {
             System.err.println("Error loading tasks: " + e.getMessage());

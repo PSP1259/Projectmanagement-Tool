@@ -20,8 +20,8 @@ public class MainView extends JFrame {
     private final JButton addButton;
     private final JButton deleteButton;
     private final JButton toggleStatusButton;
+    private final JButton startTimerButton;
     private final JLabel progressLabel;
-
 
     public MainView() {
 
@@ -68,6 +68,9 @@ public class MainView extends JFrame {
         toggleStatusButton = new JButton("Toggle Status");
         buttonPanel.add(toggleStatusButton);
 
+        startTimerButton = new JButton("Start Time Tracking");
+        buttonPanel.add(startTimerButton);
+
         bottomPanel.add(inputPanel, BorderLayout.CENTER);
         bottomPanel.add(buttonPanel, BorderLayout.SOUTH);
 
@@ -88,6 +91,10 @@ public class MainView extends JFrame {
 
     public JButton getToggleStatusButton() {
         return toggleStatusButton;
+    }
+
+    public JButton getStartTimerButton() {
+        return startTimerButton;
     }
 
     public String getTitleInput() {

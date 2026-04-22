@@ -7,11 +7,18 @@ import view.MainView;
 // Import helper class
 import utils.DataStorage;
 
+import javax.swing.JDialog;
+import javax.swing.JLabel;
 import javax.swing.JOptionPane;
+import javax.swing.SwingConstants;
+import javax.swing.JButton;
+import java.awt.BorderLayout;
 import java.awt.event.ActionEvent;
 import java.beans.PropertyChangeEvent;
 import java.beans.PropertyChangeListener;
 import java.util.ArrayList;
+import java.util.Timer;
+import java.util.TimerTask;
 
 /**
  * The TaskController handles the application startup and user interactions.
@@ -39,6 +46,7 @@ public class TaskController implements PropertyChangeListener {
         this.view.getAddButton().addActionListener((ActionEvent e) -> handleAddTask());
         this.view.getDeleteButton().addActionListener((ActionEvent e) -> handleDeleteTask());
         this.view.getToggleStatusButton().addActionListener((ActionEvent e) -> handleToggleStatus());
+        this.view.getStartTimerButton().addActionListener((ActionEvent e) -> handleStartTimer());
 
         // INITIAL LOAD LOGIC
         // 1. Load existing tasks from the XML file
@@ -78,6 +86,7 @@ public class TaskController implements PropertyChangeListener {
 
         String titleToDelete = JOptionPane.showInputDialog(view, "Enter the exact title of the task to delete:");
 
+        // Validation
         if (titleToDelete != null && !titleToDelete.trim().isEmpty()) {
             model.removeTaskByTitle(titleToDelete);
         }
@@ -87,10 +96,77 @@ public class TaskController implements PropertyChangeListener {
     private void handleToggleStatus() {
         String titleToToggle = JOptionPane.showInputDialog(view, "Enter the title of the task to mark Open/Done:");
 
-        // Is the Input valid?
+        // Validation
         if (titleToToggle != null && !titleToToggle.trim().isEmpty()) {
             model.toggleTaskStatus(titleToToggle);
         }
+    }
+
+    // Opens input dialog → resolves Task → starts tracking dialog
+    /**
+     * Initiates the time tracking process for a specific task.
+     * Uses the Model's search function to locate the task.
+     */
+    private void handleStartTimer() {
+        String titleToTrack = JOptionPane.showInputDialog(view, "Enter the exact title of the task to track time for:");
+
+        if (titleToTrack != null && !titleToTrack.trim().isEmpty()) {
+
+            Task taskToTrack = model.findTaskByTitle(titleToTrack);
+
+            if (taskToTrack != null) {
+                startTimerDialog(taskToTrack);
+            } else {
+                JOptionPane.showMessageDialog(view, "Task not found!", "Error", JOptionPane.ERROR_MESSAGE);
+            }
+        }
+    }
+
+    /**
+     * Modal dialog for time tracking.
+     * Starts background Timer → updates UI every second → persists result on stop.
+     */
+    private void startTimerDialog(Task task) {
+
+        // Modal dialog setup (blocks main UI)
+        JDialog timerDialog = new JDialog(view, "Tracking Time: " + task.getTitle(), true);
+        timerDialog.setSize(300, 150);
+        timerDialog.setLayout(new BorderLayout());
+        timerDialog.setLocationRelativeTo(view);
+
+        JLabel timeLabel = new JLabel("Time tracking active...", SwingConstants.CENTER);
+        timerDialog.add(timeLabel, BorderLayout.CENTER);
+
+        JButton stopButton = new JButton("Stop Tracking");
+        timerDialog.add(stopButton, BorderLayout.SOUTH);
+
+        // Timer state
+        Timer timer = new Timer();
+        final int[] secondsPassed = {0};
+
+        // Periodic task (1s interval)
+        TimerTask trackingTask = new TimerTask() {
+            @Override
+            public void run() {
+                secondsPassed[0]++;
+                timeLabel.setText("Time elapsed: " + secondsPassed[0] + " seconds");
+            }
+        };
+
+        // Schedule execution (0 delay, 1s period)
+        timer.schedule(trackingTask, 0, 1000);
+
+        // Stop event → cleanup + persist
+        stopButton.addActionListener(e -> {
+            timer.cancel();                         // Stops the timer
+            timerDialog.dispose();                  // Closes the input
+
+            task.addTimeInSeconds(secondsPassed[0]);
+
+            model.forceUpdateAndSave();
+        });
+
+        timerDialog.setVisible(true);
     }
 
     /**
