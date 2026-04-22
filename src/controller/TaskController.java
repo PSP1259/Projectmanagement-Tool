@@ -4,6 +4,9 @@ import model.ProjectModel;
 import model.Task;
 import view.MainView;
 
+// Import helper class
+import utils.DataStorage;
+
 import javax.swing.JOptionPane;
 import java.awt.event.ActionEvent;
 import java.beans.PropertyChangeEvent;
@@ -11,9 +14,8 @@ import java.beans.PropertyChangeListener;
 import java.util.ArrayList;
 
 /**
- * The Controller acts as the brain of the application.
- * It interprets user actions (like button clicks) and updates the Model accordingly.
- * It implements PropertyChangeListener to react to changes in the Model properties.
+ * The TaskController handles the application startup and user interactions.
+ * It initializes the view with data loaded from storage.
  */
 
 public class TaskController implements PropertyChangeListener {
@@ -33,11 +35,18 @@ public class TaskController implements PropertyChangeListener {
         this.model = model;
         this.view = view;
 
-        // 1. The Controller registers itself with the Model to be notified of changes
         this.model.addPropertyChangeListener(this);
-
-        // 2. Register Event-Handler (ActionListener) for the View's Add Button
         this.view.getAddButton().addActionListener((ActionEvent e) -> handleAddTask());
+
+        // INITIAL LOAD LOGIC
+        // 1. Load existing tasks from the XML file
+        ArrayList<Task> loadedTasks = DataStorage.loadTasks();
+
+        // 2. Put the tasks into the model
+        this.model.setTasks(loadedTasks);
+
+        // 3. Manually update the view for the first time
+        this.view.updateTaskList(loadedTasks);
     }
 
     /**

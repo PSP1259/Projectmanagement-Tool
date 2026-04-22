@@ -1,6 +1,8 @@
 package model;
 
-import utils.DataStorage;                       // Import helper class
+// Import helper class
+import utils.DataStorage;
+
 import java.beans.PropertyChangeListener;
 import java.beans.PropertyChangeSupport;
 import java.util.ArrayList;
