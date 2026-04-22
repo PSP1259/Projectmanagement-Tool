@@ -1,5 +1,6 @@
 package model;
 
+import utils.DataStorage;                       // Import helper class
 import java.beans.PropertyChangeListener;
 import java.beans.PropertyChangeSupport;
 import java.util.ArrayList;
@@ -14,37 +15,39 @@ public class ProjectModel {
 
     private ArrayList<Task> tasks;
 
-    // Hilfklasse Event-Listeners
+    // Event-Listeners
     private final PropertyChangeSupport pcs = new PropertyChangeSupport(this);
-
-    /**
-     * constructor: initialization the empty task list
-     */
 
     public ProjectModel() {
         this.tasks = new ArrayList<Task>();
     }
 
     /**
-     * Fügt eine neue Aufgabe zur Liste hinzu und informiert die Listener.
-     * @param task Die hinzuzufügende Aufgabe.
+     * Sets the entire list of tasks (used during initial load).
+     * @param tasks The list of tasks loaded from storage.
      */
-
-    public void addTask(Task task) {
-        // Alten Zustand speichern
-        ArrayList<Task> oldTasks = new ArrayList<>(this.tasks);
-
-        this.tasks.add(task);
-
-        // Listener über Aenderung informieren
-        pcs.firePropertyChange("tasks", oldTasks, this.tasks);
+    public void setTasks(ArrayList<Task> tasks) {
+        this.tasks = tasks;
     }
 
     /**
-     * Ermöglicht es anderen Klassen (z.B. der View oder dem Controller),
-     * sich für Änderungen an diesem Model anzumelden.
-     * @param listener Das Objekt, das benachrichtigt werden möchte.
+     * Adds a task and triggers an automatic save to the XML file.
+     * @param task The task to be added.
      */
+    public void addTask(Task task) {
+        ArrayList<Task> oldTasks = new ArrayList<>(this.tasks);
+        this.tasks.add(task);
+
+        // 1. Save data to XML using Properties
+        DataStorage.saveTasks(this.tasks);
+
+        // 2. Notify listeners that the data has changed
+        pcs.firePropertyChange("tasks", oldTasks, this.tasks);
+    }
+
+    public ArrayList<Task> getTasks() {
+        return new ArrayList<>(tasks);
+    }
 
     public void addPropertyChangeListener(PropertyChangeListener listener) {
         pcs.addPropertyChangeListener(listener);
