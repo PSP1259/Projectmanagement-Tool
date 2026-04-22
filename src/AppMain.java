@@ -32,5 +32,4 @@ public class AppMain {
             view.setVisible(true);
         });
     }
-
 }
