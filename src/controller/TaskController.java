@@ -64,6 +64,15 @@ public class TaskController implements PropertyChangeListener {
     private void handleAddTask() {
         String title = view.getTitleInput();
         String description = view.getDescriptionInput();
+        String initialTimeStr = view.getInitialTimeInput();
+
+        // Set a time
+        int initialSeconds = 0;
+        try {
+            initialSeconds = Integer.parseInt(initialTimeStr.trim()) * 60;
+        }
+        catch (NumberFormatException e) {
+        }
 
         // Error handling: ensure title is not empty
         if (title.trim().isEmpty()) {
@@ -72,7 +81,7 @@ public class TaskController implements PropertyChangeListener {
         }
 
         // default status: "Open"
-        Task newTask = new Task(title, description, "Open");
+        Task newTask = new Task(title, description, "Open", initialSeconds);
 
         model.addTask(newTask);
 

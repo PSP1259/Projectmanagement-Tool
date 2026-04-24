@@ -18,6 +18,7 @@ public class MainView extends JFrame {
     private final JEditorPane taskEditorPane;           // Design optimization
     private final JTextField titleField;
     private final JTextField descriptionField;
+    private final JTextField initialTimeField;
     private final JButton addButton;
     private final JButton deleteButton;
     private final JButton toggleStatusButton;
@@ -60,7 +61,7 @@ public class MainView extends JFrame {
         bottomPanel.setLayout(new BorderLayout());
 
         JPanel inputPanel = new JPanel();
-        inputPanel.setLayout(new GridLayout(2, 2, 5, 5));
+        inputPanel.setLayout(new GridLayout(3, 2, 5, 5));
 
         inputPanel.add(new JLabel("Title:"));
         titleField = new JTextField();
@@ -69,6 +70,10 @@ public class MainView extends JFrame {
         inputPanel.add(new JLabel("Description:"));
         descriptionField = new JTextField();
         inputPanel.add(descriptionField);
+
+        inputPanel.add(new JLabel("Initial Time (min):"));
+        initialTimeField = new JTextField("0"); // Standardwert 0
+        inputPanel.add(initialTimeField);
 
         JPanel buttonPanel = new JPanel();
         buttonPanel.setLayout(new FlowLayout(FlowLayout.RIGHT));
@@ -126,9 +131,15 @@ public class MainView extends JFrame {
         return descriptionField.getText();
     }
 
+    public String getInitialTimeInput() {
+        return initialTimeField.getText();
+    }
+
+    // In clearInputs() auch das Zeitfeld zurücksetzen
     public void clearInputs() {
         titleField.setText("");
         descriptionField.setText("");
+        initialTimeField.setText("0");
     }
 
     /** OLD Design (from line xy the new design)
