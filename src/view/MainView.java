@@ -21,13 +21,14 @@ public class MainView extends JFrame {
     private final JButton deleteButton;
     private final JButton toggleStatusButton;
     private final JButton startTimerButton;
+    private final JButton editButton;
     private final JLabel progressLabel;
 
     public MainView() {
 
         // 1. Top-Level Container JFrame: initialize and define Layout
         setTitle("Projectmanagement-Tool");
-        setSize(500, 400);
+        setSize(700, 500);
         setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
         setLayout(new BorderLayout());
 
@@ -71,6 +72,9 @@ public class MainView extends JFrame {
         startTimerButton = new JButton("Start Time Tracking");
         buttonPanel.add(startTimerButton);
 
+        editButton = new JButton("Edit Task");
+        buttonPanel.add(editButton);
+
         bottomPanel.add(inputPanel, BorderLayout.CENTER);
         bottomPanel.add(buttonPanel, BorderLayout.SOUTH);
 
@@ -95,6 +99,10 @@ public class MainView extends JFrame {
 
     public JButton getStartTimerButton() {
         return startTimerButton;
+    }
+
+    public JButton getEditButton() {
+        return editButton;
     }
 
     public String getTitleInput() {
@@ -128,6 +136,8 @@ public class MainView extends JFrame {
             }
 
             taskTextArea.append(t.toString() + "\n");
+            taskTextArea.append("Details: " + t.getDescription() + "\n");
+            taskTextArea.append("--------------------------------------------------\n");
         }
 
         // Update the progress label at the top of the window

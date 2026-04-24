@@ -7,13 +7,10 @@ import view.MainView;
 // Import helper class
 import utils.DataStorage;
 
-import javax.swing.JDialog;
-import javax.swing.JLabel;
-import javax.swing.JOptionPane;
-import javax.swing.SwingConstants;
-import javax.swing.JButton;
+import javax.swing.*;
 import java.awt.BorderLayout;
 import java.awt.event.ActionEvent;
+import java.awt.TextField;
 import java.beans.PropertyChangeEvent;
 import java.beans.PropertyChangeListener;
 import java.util.ArrayList;
@@ -47,6 +44,7 @@ public class TaskController implements PropertyChangeListener {
         this.view.getDeleteButton().addActionListener((ActionEvent e) -> handleDeleteTask());
         this.view.getToggleStatusButton().addActionListener((ActionEvent e) -> handleToggleStatus());
         this.view.getStartTimerButton().addActionListener((ActionEvent e) -> handleStartTimer());
+        this.view.getEditButton().addActionListener((ActionEvent e) -> handleEditTask());
 
         // INITIAL LOAD LOGIC
         // 1. Load existing tasks from the XML file
@@ -167,6 +165,47 @@ public class TaskController implements PropertyChangeListener {
         });
 
         timerDialog.setVisible(true);
+    }
+
+    /**
+     * Opens a dialog to edit an existing task's title and description.
+     * Finds the task using the model's search function.
+     */
+    private void handleEditTask() {
+        String titleToEdit = JOptionPane.showInputDialog(view, "Enter the exact title of the task to edit:");
+
+        if (titleToEdit != null && !titleToEdit.trim().isEmpty()) {
+            Task taskToEdit = model.findTaskByTitle(titleToEdit);
+
+            if (taskToEdit != null) {
+                JTextField titleField = new JTextField(taskToEdit.getTitle());
+                JTextField descriptionField = new JTextField(taskToEdit.getDescription());
+
+                Object[] inputFields = {
+                        "New Title:", titleField,
+                        "New Description:", descriptionField
+                };
+
+                int result = JOptionPane.showConfirmDialog(view, inputFields, "Edit Task", JOptionPane.OK_CANCEL_OPTION);
+
+                if (result == JOptionPane.OK_OPTION) {
+                    String newTitle = titleField.getText().trim();
+
+                    // Validation
+                    if (newTitle.isEmpty()) {
+                        JOptionPane.showMessageDialog(view, "Title cannot be empty!", "Error", JOptionPane.ERROR_MESSAGE);
+                        return;
+                    }
+
+                    taskToEdit.setTitle(newTitle);
+                    taskToEdit.setDescription(descriptionField.getText());
+
+                    model.forceUpdateAndSave();
+                }
+            } else {
+                JOptionPane.showMessageDialog(view, "Task not found!", "Error", JOptionPane.ERROR_MESSAGE);
+            }
+        }
     }
 
     /**
