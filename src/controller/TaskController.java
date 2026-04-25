@@ -16,6 +16,8 @@ import java.beans.PropertyChangeListener;
 import java.util.ArrayList;
 import java.util.Timer;
 import java.util.TimerTask;
+import java.util.Date;
+import java.text.SimpleDateFormat;
 
 /**
  * The TaskController handles the application startup and user interactions.
@@ -65,23 +67,34 @@ public class TaskController implements PropertyChangeListener {
         String title = view.getTitleInput();
         String description = view.getDescriptionInput();
         String initialTimeStr = view.getInitialTimeInput();
-
-        // Set a time
-        int initialSeconds = 0;
-        try {
-            initialSeconds = Integer.parseInt(initialTimeStr.trim()) * 60;
-        }
-        catch (NumberFormatException e) {
-        }
+        String deadline = view.getDeadlineInput().trim();
 
         // Error handling: ensure title is not empty
         if (title.trim().isEmpty()) {
             JOptionPane.showMessageDialog(view, "Task title cannot be empty", "Error", JOptionPane.ERROR_MESSAGE);
             return;
         }
+        // Set a time
+        int initialSeconds = 0;
+        try {
+            initialSeconds = Integer.parseInt(initialTimeStr.trim()) * 60;
+        }
+        catch (NumberFormatException e) { // Default to 0
+        }
+
+        // Strict Date Format Validation using Regex
+        // Ensures exactly DD.MM.YYYY format
+        if (!deadline.isEmpty() && !deadline.matches("^(0[1-9]|[12][0-9]|3[01])\\.(0[1-9]|1[012])\\.\\d{4}$")) {
+            JOptionPane.showMessageDialog(view, "Invalid Deadline Format!\nPlease use exactly: dd.mm.yyyy (e.g. 24.04.2026)", "Format Error", JOptionPane.ERROR_MESSAGE);
+            return;
+        }
+
+        // Auto-generate the current creation date
+        SimpleDateFormat formatter = new SimpleDateFormat("dd.mm.yyyy");
+        String creationDate = formatter.format(new Date());
 
         // default status: "Open"
-        Task newTask = new Task(title, description, "Open", initialSeconds);
+        Task newTask = new Task(title, description, "Open", initialSeconds, creationDate, deadline);
 
         model.addTask(newTask);
 

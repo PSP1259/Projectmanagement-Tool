@@ -19,6 +19,7 @@ public class MainView extends JFrame {
     private final JTextField titleField;
     private final JTextField descriptionField;
     private final JTextField initialTimeField;
+    private final JTextField deadlineField;
     private final JButton addButton;
     private final JButton deleteButton;
     private final JButton toggleStatusButton;
@@ -61,7 +62,7 @@ public class MainView extends JFrame {
         bottomPanel.setLayout(new BorderLayout());
 
         JPanel inputPanel = new JPanel();
-        inputPanel.setLayout(new GridLayout(3, 2, 5, 5));
+        inputPanel.setLayout(new GridLayout(4, 2, 5, 5));
 
         inputPanel.add(new JLabel("Title:"));
         titleField = new JTextField();
@@ -74,6 +75,10 @@ public class MainView extends JFrame {
         inputPanel.add(new JLabel("Initial Time (min):"));
         initialTimeField = new JTextField("0"); // Standardwert 0
         inputPanel.add(initialTimeField);
+
+        inputPanel.add(new JLabel("Deadline (dd.mm.yyyy):"));
+        deadlineField = new JTextField("");
+        inputPanel.add(deadlineField);
 
         JPanel buttonPanel = new JPanel();
         buttonPanel.setLayout(new FlowLayout(FlowLayout.RIGHT));
@@ -135,11 +140,16 @@ public class MainView extends JFrame {
         return initialTimeField.getText();
     }
 
+    public String getDeadlineInput() {
+        return deadlineField.getText();
+    }
+
     // In clearInputs() auch das Zeitfeld zurücksetzen
     public void clearInputs() {
         titleField.setText("");
         descriptionField.setText("");
         initialTimeField.setText("0");
+        deadlineField.setText("");
     }
 
     /** OLD Design (from line xy the new design)
@@ -181,15 +191,14 @@ public class MainView extends JFrame {
         int totalTasks = tasks.size();
         int doneTasks = 0;
 
-        // We use StringBuilder to efficiently construct the HTML text
+        // StringBuilder to construct the HTML text
         StringBuilder html = new StringBuilder();
 
         // --- CSS STYLING ---
         html.append("<html><head><style>");
         html.append("body { font-family: Arial, sans-serif; font-size: 13px; margin: 10px; }");
         html.append("h2 { margin-top: 0; margin-bottom: 5px; font-size: 16px; color: #333; }");
-        // Added margin-bottom: 15px here to create the extra space after the description!
-        html.append(".details { margin-left: 20px; margin-bottom: 15px; font-style: italic; color: #555; }");
+        html.append(".details { margin-bottom: 15px; font-style: italic; color: #555; }");
         html.append("table { width: 100%; border-collapse: collapse; margin-bottom: 5px; }");
         html.append("td { padding: 2px; }");
         html.append(".time-warning { color: red; font-weight: bold; }");
@@ -207,23 +216,32 @@ public class MainView extends JFrame {
             // Calculate tracked time in both minutes AND seconds
             int totalSeconds = t.getTimeSpentInSeconds();
             int minutes = totalSeconds / 60;
-            int seconds = totalSeconds % 60; // Returns the remainder in seconds
+            int seconds = totalSeconds % 60;
 
             // Dynamic CSS classes based on logical state
             String statusClass = t.getStatus().equals("Done") ? "status-done" : "status-open";
             String timeClass = minutes >= 60 ? "time-warning" : "";
 
-            // Build the HTML structure for a single task (Table layout)
+            // --- Build the HTML structure for a single task (Table layout) ---
+
+            // North: Title
             html.append("<div>");
             html.append("<h2>📌 ").append(t.getTitle().toUpperCase()).append("</h2>");
             html.append("<table border='0'><tr>");
-            html.append("<td width='50%'>Status: <span class='").append(statusClass).append("'>").append(t.getStatus()).append("</span></td>");
-
-            // Appending minutes AND seconds here
-            html.append("<td>Time: <span class='").append(timeClass).append("'>").append(minutes).append(" min ").append(seconds).append(" sec</span></td>");
-
+            // 1. column: status
+            html.append("<td width='35%'>Status: <span class='").append(statusClass).append("'>").append(t.getStatus()).append("</span></td>");
+            // 2. column: time
+            html.append("<td width='30%'>Time: <span class='").append(timeClass).append("'>").append(minutes).append(" min ").append(seconds).append(" sec</span></td>");
+            // 3. column: dates
+            html.append("<td width='35%' align='right' valign='top'>");
+            html.append("Created: ").append(t.getCreationDate());
+            // Only view dates if set
+            if (!t.getDeadline().isEmpty() && !t.getDeadline().equals("None")) {
+                html.append("<span class='deadline-date'>Deadline: ").append(t.getDeadline()).append("</span>");
+            }
+            html.append("</td>");
             html.append("</tr></table>");
-            // The details div now automatically has more space below it thanks to CSS
+            // South: Details
             html.append("<div class='details'>").append(t.getDescription()).append("</div>");
             html.append("<hr>");
             html.append("</div>");

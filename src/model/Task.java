@@ -10,25 +10,23 @@ public class Task {
     private String title;
     private String description;
     private String status;
+    private String creationDate;
+    private String deadline;
     private int timeSpentInSeconds;
 
-    /**
-     * constructor for a new Task
-     *
-     * @param title Der Titel der Aufgabe.
-     * @param description Eine kurze Beschreibung der Aufgabe.
-     * @param status Der aktuelle Bearbeitungsstatus ('Open' or 'Done').
-     */
-
+    // Legacy constructor for creating a basic Task
     public Task(String title, String description, String status) {
-        this(title, description, status, 0);
+        this(title, description, status, 0, "", "");
     }
 
-    public Task(String title, String description, String status, int timeSpentInSeconds) {
+    // Full constructor to initialize a Task with all 6 attributes
+    public Task(String title, String description, String status, int timeSpentInSeconds, String creationDate, String deadline) {
         this.title = title;
         this.description = description;
         this.status = status;
         this.timeSpentInSeconds = timeSpentInSeconds;
+        this.creationDate = creationDate;
+        this.deadline = deadline;
     }
 
     public String getTitle(){
@@ -63,9 +61,20 @@ public class Task {
         this.timeSpentInSeconds += seconds;
     }
 
+    public String getCreationDate() {
+        return creationDate;
+    }
+
+    public String getDeadline() {
+        return deadline;
+    }
+
+    public void setDeadline(String deadline) {
+        this.deadline = deadline;
+    }
+
     @Override
     public String toString() {
-        int minutes = timeSpentInSeconds / 60;
-        return title + " [" + status + "] - Time: " + minutes + " min " + timeSpentInSeconds + "sec";
+        return title + " [" + status + "]";
     }
 }
