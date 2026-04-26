@@ -10,7 +10,7 @@ import utils.DataStorage;
 import javax.swing.*;
 import java.awt.BorderLayout;
 import java.awt.event.ActionEvent;
-import java.awt.TextField;
+import javax.swing.JTextField;
 import java.beans.PropertyChangeEvent;
 import java.beans.PropertyChangeListener;
 import java.util.ArrayList;
@@ -202,25 +202,48 @@ public class TaskController implements PropertyChangeListener {
             if (taskToEdit != null) {
                 JTextField titleField = new JTextField(taskToEdit.getTitle());
                 JTextField descriptionField = new JTextField(taskToEdit.getDescription());
+                int currentMinutes = taskToEdit.getTimeSpentInSeconds() / 60;
+                JTextField timeField = new JTextField(String.valueOf(currentMinutes));
+                String currentDeadline = taskToEdit.getDeadline().equals("None") ? "" : taskToEdit.getDeadline();
+                JTextField deadlineField = new JTextField(currentDeadline);
 
                 Object[] inputFields = {
-                        "New Title:", titleField,
-                        "New Description:", descriptionField
+                        "Title:", titleField,
+                        "Description:", descriptionField,
+                        "Total Time Spent (in minutes):", timeField,
+                        "Deadline (dd.mm.yyyy or leave empty):", deadlineField
                 };
 
                 int result = JOptionPane.showConfirmDialog(view, inputFields, "Edit Task", JOptionPane.OK_CANCEL_OPTION);
 
                 if (result == JOptionPane.OK_OPTION) {
                     String newTitle = titleField.getText().trim();
+                    String newDeadline = deadlineField.getText().trim();
 
-                    // Validation
+                    // Validation: title cannot be empty
                     if (newTitle.isEmpty()) {
                         JOptionPane.showMessageDialog(view, "Title cannot be empty!", "Error", JOptionPane.ERROR_MESSAGE);
                         return;
                     }
 
+                    // Validation: deadline regex
+                    if (!newDeadline.isEmpty() && !newDeadline.matches("^(0[1-9]|[12][0-9]|3[01])\\.(0[1-9]|1[012])\\.\\d{4}$")) {
+                        JOptionPane.showMessageDialog(view, "Invalid Deadline Format!\nPlease use exactly: dd.MM.yyyy", "Format Error", JOptionPane.ERROR_MESSAGE);
+                        return;
+                    }
+
+                    // Validation: time in int and convert in seconds
+                    int newTimeInSeconds = taskToEdit.getTimeSpentInSeconds(); // Fallback auf alten Wert
+                    try {
+                        newTimeInSeconds = Integer.parseInt(timeField.getText().trim()) * 60;
+                    } catch (NumberFormatException e) {
+                        JOptionPane.showMessageDialog(view, "Invalid time entered. Time was not updated.", "Warning", JOptionPane.WARNING_MESSAGE);
+                    }
+
                     taskToEdit.setTitle(newTitle);
                     taskToEdit.setDescription(descriptionField.getText());
+                    taskToEdit.setDeadline(newDeadline.isEmpty() ? "None" : newDeadline);
+                    taskToEdit.setTimeSpentInSeconds(newTimeInSeconds);
 
                     model.forceUpdateAndSave();
                 }

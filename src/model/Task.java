@@ -61,6 +61,10 @@ public class Task {
         this.timeSpentInSeconds += seconds;
     }
 
+    public void setTimeSpentInSeconds(int seconds) {
+        this.timeSpentInSeconds = seconds;
+    }
+
     public String getCreationDate() {
         return creationDate;
     }
