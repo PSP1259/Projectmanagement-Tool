@@ -319,7 +319,7 @@ public class TaskController implements PropertyChangeListener {
 
     // Allows you to add a comment to an existing task.
     private void handleAddComment() {
-        // 1. ask which task to comment on
+        // 1. Ask which task to comment on
         String titleToComment = JOptionPane.showInputDialog(view, "Enter the exact title of the task to comment on:");
 
         if (titleToComment != null && !titleToComment.trim().isEmpty()) {
@@ -338,7 +338,7 @@ public class TaskController implements PropertyChangeListener {
                 Object[] inputFields = {
                         "Author Name:", authorField,
                         "Comment:", commentField,
-                        "Date (dd.MM.yyyy):", dateField
+                        "Date (dd.mm.yyyy):", dateField
                 };
 
                 // 3. Show the single, clean dialog
