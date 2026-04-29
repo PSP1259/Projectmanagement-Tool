@@ -355,7 +355,7 @@ public class TaskController implements PropertyChangeListener {
                         return;
                     }
 
-                    // Basic Date Validation (Optional but highly recommended)
+                    // Date Validation
                     if (!date.matches("^(0[1-9]|[12][0-9]|3[01])\\.(0[1-9]|1[012])\\.\\d{4}$")) {
                         JOptionPane.showMessageDialog(view, "Invalid Date Format! Please use dd.mm.yyyy", "Format Error", JOptionPane.ERROR_MESSAGE);
                         return;
