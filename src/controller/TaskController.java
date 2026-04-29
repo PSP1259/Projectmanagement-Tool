@@ -62,6 +62,8 @@ public class TaskController implements PropertyChangeListener {
 
         // 3. Manually update the view for the first time
         this.view.updateTaskList(loadedTasks);
+
+        applyFilterAndSort();
     }
 
     /**
