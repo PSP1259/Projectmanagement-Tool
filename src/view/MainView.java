@@ -26,6 +26,7 @@ public class MainView extends JFrame {
     private final JButton startTimerButton;
     private final JButton editButton;
     private final JLabel progressLabel;
+    private final JComboBox<String> assigneeComboBox;
 
     public MainView() {
 
@@ -62,7 +63,7 @@ public class MainView extends JFrame {
         bottomPanel.setLayout(new BorderLayout());
 
         JPanel inputPanel = new JPanel();
-        inputPanel.setLayout(new GridLayout(4, 2, 5, 5));
+        inputPanel.setLayout(new GridLayout(5, 2, 5, 5));
 
         inputPanel.add(new JLabel("Title:"));
         titleField = new JTextField();
@@ -79,6 +80,11 @@ public class MainView extends JFrame {
         inputPanel.add(new JLabel("Deadline (dd.mm.yyyy):"));
         deadlineField = new JTextField("");
         inputPanel.add(deadlineField);
+
+        inputPanel.add(new JLabel("Assignee:"));
+        assigneeComboBox = new JComboBox<>(new String[]{"psp", "adm", "dev"});
+        assigneeComboBox.setEditable(true);
+        inputPanel.add(assigneeComboBox);
 
         JPanel buttonPanel = new JPanel();
         buttonPanel.setLayout(new FlowLayout(FlowLayout.RIGHT));
@@ -144,12 +150,28 @@ public class MainView extends JFrame {
         return deadlineField.getText();
     }
 
+    public String getAssigneeInput() {
+        return assigneeComboBox.getSelectedItem() != null ? assigneeComboBox.getSelectedItem().toString() : "";
+    }
+
+    public void addAssigneeToDropdown(String newAssignee) {
+        boolean exists = false; // Eliminate duplication
+        for (int i = 0; i < assigneeComboBox.getItemCount(); i++) {
+            if (assigneeComboBox.getItemAt(i).equalsIgnoreCase(newAssignee)) {
+                exists = true; break;
+            }
+        }
+        if (!exists && !newAssignee.isEmpty()) {
+            assigneeComboBox.addItem(newAssignee);
+        }
+    }
     // In clearInputs() auch das Zeitfeld zurücksetzen
     public void clearInputs() {
         titleField.setText("");
         descriptionField.setText("");
         initialTimeField.setText("0");
         deadlineField.setText("");
+        assigneeComboBox.setSelectedItem("");
     }
 
     /** OLD Design (from line xy the new design)
@@ -204,6 +226,7 @@ public class MainView extends JFrame {
         html.append(".time-warning { color: red; font-weight: bold; }");
         html.append(".status-open { color: blue; font-weight: bold; }");
         html.append(".status-done { color: green; font-weight: bold; }");
+        html.append(".assignee-pill { background-color: #f39c12; color: white; padding: 2px 6px; border-radius: 4px; font-size: 11px; font-weight: bold; margin-right: 4px; }");
         html.append("hr { border: 0; border-top: 1px solid #ccc; margin-top: 5px; margin-bottom: 15px; }");
         html.append("</style></head><body>");
 
@@ -224,8 +247,19 @@ public class MainView extends JFrame {
 
             // --- Build the HTML structure for a single task (Table layout) ---
 
-            // North: Title
+            // North: generate assignees & show title
             html.append("<div>");
+            if (!t.getAssignees().trim().isEmpty()) {
+                html.append("<div style='margin-bottom: 3px;'>");
+                String[] persons = t.getAssignees().split(","); // Seperate assignees with ,
+                for (String p : persons) {
+                    if (!p.trim().isEmpty()) {
+                        // Orange CSS pill for every assignee
+                        html.append("<span class='assignee-pill'>[").append(p.trim().toUpperCase()).append("]</span> ");
+                    }
+                }
+                html.append("</div>");
+            }
             html.append("<h2>📌 ").append(t.getTitle().toUpperCase()).append("</h2>");
             html.append("<table border='0'><tr>");
             // 1. column: status
@@ -249,11 +283,15 @@ public class MainView extends JFrame {
 
         html.append("</body></html>");
 
-        // Push the generated HTML to the UI
+        // Remember scroll position
+        JViewport viewport = (JViewport) taskEditorPane.getParent();
+        Point scrollPosition = viewport.getViewPosition();
+
+        // Update text
         taskEditorPane.setText(html.toString());
 
-        // Auto-scroll back to the top of the list after an update
-        taskEditorPane.setCaretPosition(0);
+        // Restore position
+        SwingUtilities.invokeLater(() -> viewport.setViewPosition(scrollPosition));
 
         // Update the top label
         progressLabel.setText("Progress: " + doneTasks + " of " + totalTasks + " Tasks Done");

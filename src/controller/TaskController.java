@@ -68,6 +68,7 @@ public class TaskController implements PropertyChangeListener {
         String description = view.getDescriptionInput();
         String initialTimeStr = view.getInitialTimeInput();
         String deadline = view.getDeadlineInput().trim();
+        String assignees = view.getAssigneeInput().trim();
 
         // Error handling: ensure title is not empty
         if (title.trim().isEmpty()) {
@@ -94,14 +95,18 @@ public class TaskController implements PropertyChangeListener {
         String creationDate = formatter.format(new Date());
 
         // default status: "Open"
-        Task newTask = new Task(title, description, "Open", initialSeconds, creationDate, deadline);
+        Task newTask = new Task(title, description, "Open", initialSeconds, creationDate, deadline, assignees);
 
         model.addTask(newTask);
 
+        // Safe the assignee in the dropdown
+        if (!assignees.isEmpty()) {
+            view.addAssigneeToDropdown(assignees);
+        }
         view.clearInputs();
     }
 
-    // Opens an input dialog to ask for the task title and tells the model to remove it.
+    // Opens an input dialog to ask for the task title and tells the model to remove it
     private void handleDeleteTask() {
 
         String titleToDelete = JOptionPane.showInputDialog(view, "Enter the exact title of the task to delete:");
@@ -206,12 +211,14 @@ public class TaskController implements PropertyChangeListener {
                 JTextField timeField = new JTextField(String.valueOf(currentMinutes));
                 String currentDeadline = taskToEdit.getDeadline().equals("None") ? "" : taskToEdit.getDeadline();
                 JTextField deadlineField = new JTextField(currentDeadline);
+                JTextField assigneesField = new JTextField(taskToEdit.getAssignees());
 
                 Object[] inputFields = {
                         "Title:", titleField,
                         "Description:", descriptionField,
                         "Total Time Spent (in minutes):", timeField,
-                        "Deadline (dd.mm.yyyy or leave empty):", deadlineField
+                        "Deadline (dd.mm.yyyy or leave empty):", deadlineField,
+                        "Assignees (comma-separated):", assigneesField,
                 };
 
                 int result = JOptionPane.showConfirmDialog(view, inputFields, "Edit Task", JOptionPane.OK_CANCEL_OPTION);
@@ -244,6 +251,7 @@ public class TaskController implements PropertyChangeListener {
                     taskToEdit.setDescription(descriptionField.getText());
                     taskToEdit.setDeadline(newDeadline.isEmpty() ? "None" : newDeadline);
                     taskToEdit.setTimeSpentInSeconds(newTimeInSeconds);
+                    taskToEdit.setAssignees(assigneesField.getText().trim());
 
                     model.forceUpdateAndSave();
                 }

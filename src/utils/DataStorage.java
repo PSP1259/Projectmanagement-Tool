@@ -37,6 +37,7 @@ public class DataStorage {
             props.setProperty("task." + i + ".time", String.valueOf(t.getTimeSpentInSeconds()));
             props.setProperty("task." + i + ".creationDate", t.getCreationDate());
             props.setProperty("task." + i + ".deadline", t.getDeadline());
+            props.setProperty("task." + i + ".assignees", t.getAssignees());
         }
 
         // Save the total count
@@ -88,7 +89,10 @@ public class DataStorage {
                 String creationDate = props.getProperty("task." + i + ".creationDate", "Unknown");
                 String deadline = props.getProperty("task." + i + ".deadline", "None");
 
-                loadedTasks.add(new Task(title, description, status, time, creationDate, deadline));
+                // Assignees
+                String assignees = props.getProperty("task." + i + ".assignees", "");
+
+                loadedTasks.add(new Task(title, description, status, time, creationDate, deadline, assignees));
             }
         } catch (IOException e) {
             System.err.println("Error loading tasks: " + e.getMessage());

@@ -13,20 +13,22 @@ public class Task {
     private String creationDate;
     private String deadline;
     private int timeSpentInSeconds;
+    private String assignees;
 
     // Legacy constructor for creating a basic Task
     public Task(String title, String description, String status) {
-        this(title, description, status, 0, "", "");
+        this(title, description, status, 0, "", "", "");
     }
 
     // Full constructor to initialize a Task with all 6 attributes
-    public Task(String title, String description, String status, int timeSpentInSeconds, String creationDate, String deadline) {
+    public Task(String title, String description, String status, int timeSpentInSeconds, String creationDate, String deadline, String assignees) {
         this.title = title;
         this.description = description;
         this.status = status;
         this.timeSpentInSeconds = timeSpentInSeconds;
         this.creationDate = creationDate;
         this.deadline = deadline;
+        this.assignees = assignees != null ? assignees : ""; // If null: ""
     }
 
     public String getTitle(){
@@ -75,6 +77,14 @@ public class Task {
 
     public void setDeadline(String deadline) {
         this.deadline = deadline;
+    }
+
+    public String getAssignees(){
+        return assignees;
+    }
+
+    public void setAssignees(String assignees) {
+        this.assignees = assignees;
     }
 
     @Override
