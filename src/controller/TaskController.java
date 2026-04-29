@@ -319,20 +319,50 @@ public class TaskController implements PropertyChangeListener {
 
     // Allows you to add a comment to an existing task.
     private void handleAddComment() {
+        // 1. First, ask which task to comment on
         String titleToComment = JOptionPane.showInputDialog(view, "Enter the exact title of the task to comment on:");
 
         if (titleToComment != null && !titleToComment.trim().isEmpty()) {
             Task taskToComment = model.findTaskByTitle(titleToComment);
 
             if (taskToComment != null) {
-                // Wir holen uns den Autor aus dem Assignee-Filter Dropdown als Vorschlag (Keep it simple)
-                String author = (String) view.getAssigneeFilterComboBox().getSelectedItem();
-                if (author.equals("All")) author = "User"; // Fallback
+                // 2. Prepare the input fields for the unified dialog
+                JTextField authorField = new JTextField();
+                JTextField commentField = new JTextField();
 
-                String commentText = JOptionPane.showInputDialog(view, "Enter your comment (Author: " + author + "):");
+                // Pre-fill the date field with today's date
+                String currentDate = new java.text.SimpleDateFormat("dd.MM.yyyy").format(new java.util.Date());
+                JTextField dateField = new JTextField(currentDate);
 
-                if (commentText != null && !commentText.trim().isEmpty()) {
-                    taskToComment.addComment(author, commentText);
+                // Group them into an array
+                Object[] inputFields = {
+                        "Author Name:", authorField,
+                        "Comment:", commentField,
+                        "Date (dd.MM.yyyy):", dateField
+                };
+
+                // 3. Show the single, clean dialog
+                int result = JOptionPane.showConfirmDialog(view, inputFields, "Add New Comment", JOptionPane.OK_CANCEL_OPTION);
+
+                if (result == JOptionPane.OK_OPTION) {
+                    String author = authorField.getText().trim();
+                    String comment = commentField.getText().trim();
+                    String date = dateField.getText().trim();
+
+                    // Validation: Ensure author and comment are not empty
+                    if (author.isEmpty() || comment.isEmpty()) {
+                        JOptionPane.showMessageDialog(view, "Author and Comment cannot be empty!", "Input Error", JOptionPane.ERROR_MESSAGE);
+                        return;
+                    }
+
+                    // Basic Date Validation (Optional but highly recommended)
+                    if (!date.matches("^(0[1-9]|[12][0-9]|3[01])\\.(0[1-9]|1[012])\\.\\d{4}$")) {
+                        JOptionPane.showMessageDialog(view, "Invalid Date Format! Please use dd.mm.yyyy", "Format Error", JOptionPane.ERROR_MESSAGE);
+                        return;
+                    }
+
+                    // 4. Send the data to the task and update
+                    taskToComment.addComment(author, comment, date);
                     model.forceUpdateAndSave();
                 }
             } else {

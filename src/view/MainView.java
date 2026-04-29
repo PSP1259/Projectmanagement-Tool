@@ -210,13 +210,29 @@ public class MainView extends JFrame {
     }
 
     public void updateAssigneeFilterList(java.util.Set<String> uniqueAssignees) {
+        // 1. Temporarily disconnect all listeners (to prevent the loop)
+        java.awt.event.ActionListener[] listeners = assigneeFilterComboBox.getActionListeners();
+        for (java.awt.event.ActionListener l : listeners) {
+            assigneeFilterComboBox.removeActionListener(l);
+        }
+
+        // 2. Recreate the list
         String currentSelection = (String) assigneeFilterComboBox.getSelectedItem();
         assigneeFilterComboBox.removeAllItems();
         assigneeFilterComboBox.addItem("All");
         for (String name : uniqueAssignees) {
             assigneeFilterComboBox.addItem(name);
         }
-        assigneeFilterComboBox.setSelectedItem(currentSelection);
+
+        // Restore last selection (if possible)
+        if (currentSelection != null) {
+            assigneeFilterComboBox.setSelectedItem(currentSelection);
+        }
+
+        // 3. Connect Listener again
+        for (java.awt.event.ActionListener l : listeners) {
+            assigneeFilterComboBox.addActionListener(l);
+        }
     }
 
     // In clearInputs() auch das Zeitfeld zurücksetzen
@@ -279,8 +295,7 @@ public class MainView extends JFrame {
         html.append(".time-warning { color: red; font-weight: bold; }");
         html.append(".status-open { color: blue; font-weight: bold; }");
         html.append(".status-done { color: green; font-weight: bold; }");
-        html.append(".assignee-pill { background-color: #f39c12; color: white; padding: 2px 6px; border-radius: 4px; font-size: 11px; font-weight: bold; margin-right: 4px; }");
-        html.append(".comments-box { margin-left: 20px; margin-top: 10px; padding: 5px; background-color: #f9f9f9; border-left: 3px solid #007bff; font-size: 12px; }");
+        html.append(".comments-box { margin-left: 20px; margin-top: 5px; margin-bottom: 15px; padding: 5px; background-color: #f0f8ff; border-left: 3px solid #007bff; font-size: 12px; }");html.append(".comments-box { margin-left: 20px; margin-top: 10px; padding: 5px; background-color: #f9f9f9; border-left: 3px solid #007bff; font-size: 12px; }");
         html.append("hr { border: 0; border-top: 1px solid #ccc; margin-top: 5px; margin-bottom: 15px; }");
         html.append("</style></head><body>");
 

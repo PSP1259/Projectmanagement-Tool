@@ -93,8 +93,8 @@ public class Task {
         return comments;
     }
 
-    public void addComment(String author, String text) {
-        this.comments += "💬 <b>" + author + ":</b> " + text + "<br>";
+    public void addComment(String author, String text, String date) {
+        this.comments += "💬 <b>" + author + "</b> <i>(" + date + ")</i>: " + text + "<br>";
     }
 
     @Override
