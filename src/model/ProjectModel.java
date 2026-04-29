@@ -116,4 +116,30 @@ public class ProjectModel {
         }
         return null;
     }
+
+    /**
+     * Returns a list of tasks filtered by both status and assignee.
+     * @param statusFilter "All", "Open", or "Done"
+     * @param assigneeFilter The name of the assignee or "All"
+     */
+    public ArrayList<Task> getFilteredTasks(String statusFilter, String assigneeFilter) {
+        ArrayList<Task> filteredList = new ArrayList<>();
+
+        for (Task t : tasks) {
+            // 1. Check Status
+            boolean statusMatch = statusFilter.equals("All") || t.getStatus().equals(statusFilter);
+
+            // 2. Check Assignee
+            // We use contains() and toLowerCase() to find the name within the comma-separated string
+            boolean assigneeMatch = assigneeFilter.equals("All") ||
+                    t.getAssignees().toLowerCase().contains(assigneeFilter.toLowerCase());
+
+            if (statusMatch && assigneeMatch) {
+                filteredList.add(t);
+            }
+        }
+        return filteredList;
+    }
 }
+
+

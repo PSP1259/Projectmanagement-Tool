@@ -26,7 +26,11 @@ public class MainView extends JFrame {
     private final JButton startTimerButton;
     private final JButton editButton;
     private final JLabel progressLabel;
+    private final JComboBox<String> filterComboBox;
+    private final JComboBox<String> sortComboBox;
+    private final JButton commentButton;
     private final JComboBox<String> assigneeComboBox;
+    private final JComboBox<String> assigneeFilterComboBox;
 
     public MainView() {
 
@@ -36,9 +40,29 @@ public class MainView extends JFrame {
         setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
         setLayout(new BorderLayout());
 
+        JPanel topPanel = new JPanel(new BorderLayout());
+
         progressLabel = new JLabel("Progress: 0 of 0 Tasks Done", SwingConstants.CENTER);
         progressLabel.setFont(new Font("Arial", Font.BOLD, 16));
-        add(progressLabel, BorderLayout.NORTH);
+        topPanel.add(progressLabel, BorderLayout.CENTER);
+
+        JPanel controlPanel = new JPanel(new FlowLayout(FlowLayout.RIGHT));
+
+        controlPanel.add(new JLabel("Filter:"));
+        filterComboBox = new JComboBox<>(new String[]{"All", "Open", "Done"});
+        controlPanel.add(filterComboBox);
+
+        controlPanel.add(new JLabel("Sort by:"));
+        sortComboBox = new JComboBox<>(new String[]{"Default", "Deadline"});
+        controlPanel.add(sortComboBox);
+
+        controlPanel.add(new JLabel("Assignee:"));
+        assigneeFilterComboBox = new JComboBox<>(new String[]{"All"});
+        controlPanel.add(assigneeFilterComboBox);
+
+        topPanel.add(controlPanel, BorderLayout.EAST);
+
+        add(topPanel, BorderLayout.NORTH);
 
         /** OLD Design (from line 50 the new design)
          *
@@ -104,6 +128,9 @@ public class MainView extends JFrame {
         editButton = new JButton("Edit Task");
         buttonPanel.add(editButton);
 
+        commentButton = new JButton("Add Comment");
+        buttonPanel.add(commentButton);
+
         bottomPanel.add(inputPanel, BorderLayout.CENTER);
         bottomPanel.add(buttonPanel, BorderLayout.SOUTH);
 
@@ -165,13 +192,39 @@ public class MainView extends JFrame {
             assigneeComboBox.addItem(newAssignee);
         }
     }
+
+    public JComboBox<String> getFilterComboBox() {
+        return filterComboBox;
+    }
+
+    public JComboBox<String> getSortComboBox() {
+        return sortComboBox;
+    }
+
+    public JButton getCommentButton() {
+        return commentButton;
+    }
+
+    public JComboBox<String> getAssigneeFilterComboBox() {
+        return assigneeFilterComboBox;
+    }
+
+    public void updateAssigneeFilterList(java.util.Set<String> uniqueAssignees) {
+        String currentSelection = (String) assigneeFilterComboBox.getSelectedItem();
+        assigneeFilterComboBox.removeAllItems();
+        assigneeFilterComboBox.addItem("All");
+        for (String name : uniqueAssignees) {
+            assigneeFilterComboBox.addItem(name);
+        }
+        assigneeFilterComboBox.setSelectedItem(currentSelection);
+    }
+
     // In clearInputs() auch das Zeitfeld zurücksetzen
     public void clearInputs() {
         titleField.setText("");
         descriptionField.setText("");
         initialTimeField.setText("0");
         deadlineField.setText("");
-        assigneeComboBox.setSelectedItem("");
     }
 
     /** OLD Design (from line xy the new design)
@@ -227,6 +280,7 @@ public class MainView extends JFrame {
         html.append(".status-open { color: blue; font-weight: bold; }");
         html.append(".status-done { color: green; font-weight: bold; }");
         html.append(".assignee-pill { background-color: #f39c12; color: white; padding: 2px 6px; border-radius: 4px; font-size: 11px; font-weight: bold; margin-right: 4px; }");
+        html.append(".comments-box { margin-left: 20px; margin-top: 10px; padding: 5px; background-color: #f9f9f9; border-left: 3px solid #007bff; font-size: 12px; }");
         html.append("hr { border: 0; border-top: 1px solid #ccc; margin-top: 5px; margin-bottom: 15px; }");
         html.append("</style></head><body>");
 
@@ -271,12 +325,17 @@ public class MainView extends JFrame {
             html.append("Created: ").append(t.getCreationDate());
             // Only view dates if set
             if (!t.getDeadline().isEmpty() && !t.getDeadline().equals("None")) {
-                html.append("<span class='deadline-date'>Deadline: ").append(t.getDeadline()).append("</span>");
+                html.append("<br>");
+                html.append("Deadline: ").append(t.getDeadline());
             }
             html.append("</td>");
             html.append("</tr></table>");
             // South: Details
             html.append("<div class='details'>").append(t.getDescription()).append("</div>");
+            // Show comments (if existing)
+            if (!t.getComments().isEmpty()) {
+                html.append("<div class='comments-box'>").append(t.getComments()).append("</div>");
+            }
             html.append("<hr>");
             html.append("</div>");
         }

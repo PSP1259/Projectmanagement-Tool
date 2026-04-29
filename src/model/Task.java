@@ -14,21 +14,23 @@ public class Task {
     private String deadline;
     private int timeSpentInSeconds;
     private String assignees;
+    private String comments;
 
     // Legacy constructor for creating a basic Task
     public Task(String title, String description, String status) {
-        this(title, description, status, 0, "", "", "");
+        this(title, description, status, 0, "", "", "", "");
     }
 
     // Full constructor to initialize a Task with all 6 attributes
-    public Task(String title, String description, String status, int timeSpentInSeconds, String creationDate, String deadline, String assignees) {
+    public Task(String title, String description, String status, int timeSpentInSeconds, String creationDate, String deadline, String assignees, String comments) {
         this.title = title;
         this.description = description;
         this.status = status;
         this.timeSpentInSeconds = timeSpentInSeconds;
         this.creationDate = creationDate;
         this.deadline = deadline;
-        this.assignees = assignees != null ? assignees : ""; // If null: ""
+        this.assignees = assignees != null ? assignees : "";
+        this.comments = comments != null ? comments : "";
     }
 
     public String getTitle(){
@@ -85,6 +87,14 @@ public class Task {
 
     public void setAssignees(String assignees) {
         this.assignees = assignees;
+    }
+
+    public String getComments() {
+        return comments;
+    }
+
+    public void addComment(String author, String text) {
+        this.comments += "💬 <b>" + author + ":</b> " + text + "<br>";
     }
 
     @Override

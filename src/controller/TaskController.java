@@ -18,6 +18,7 @@ import java.util.Timer;
 import java.util.TimerTask;
 import java.util.Date;
 import java.text.SimpleDateFormat;
+import java.text.ParseException;
 
 /**
  * The TaskController handles the application startup and user interactions.
@@ -47,6 +48,10 @@ public class TaskController implements PropertyChangeListener {
         this.view.getToggleStatusButton().addActionListener((ActionEvent e) -> handleToggleStatus());
         this.view.getStartTimerButton().addActionListener((ActionEvent e) -> handleStartTimer());
         this.view.getEditButton().addActionListener((ActionEvent e) -> handleEditTask());
+        this.view.getFilterComboBox().addActionListener(e -> applyFilterAndSort());
+        this.view.getSortComboBox().addActionListener(e -> applyFilterAndSort());
+        this.view.getAssigneeFilterComboBox().addActionListener(e -> applyFilterAndSort());
+        this.view.getCommentButton().addActionListener(e -> handleAddComment());
 
         // INITIAL LOAD LOGIC
         // 1. Load existing tasks from the XML file
@@ -79,8 +84,7 @@ public class TaskController implements PropertyChangeListener {
         int initialSeconds = 0;
         try {
             initialSeconds = Integer.parseInt(initialTimeStr.trim()) * 60;
-        }
-        catch (NumberFormatException e) { // Default to 0
+        } catch (NumberFormatException e) { // Default to 0
         }
 
         // Strict Date Format Validation using Regex
@@ -95,7 +99,7 @@ public class TaskController implements PropertyChangeListener {
         String creationDate = formatter.format(new Date());
 
         // default status: "Open"
-        Task newTask = new Task(title, description, "Open", initialSeconds, creationDate, deadline, assignees);
+        Task newTask = new Task(title, description, "Open", initialSeconds, creationDate, deadline, assignees, "");
 
         model.addTask(newTask);
 
@@ -128,6 +132,7 @@ public class TaskController implements PropertyChangeListener {
     }
 
     // Opens input dialog → resolves Task → starts tracking dialog
+
     /**
      * Initiates the time tracking process for a specific task.
      * Uses the Model's search function to locate the task.
@@ -269,15 +274,70 @@ public class TaskController implements PropertyChangeListener {
      */
     @Override
     public void propertyChange(PropertyChangeEvent evt) {
-
-        // Check if the changed property is our "tasks" list
         if ("tasks".equals(evt.getPropertyName())) {
-            // Extract the new list of tasks from the event and cast it safely
-            @SuppressWarnings("unchecked")
-            ArrayList<Task> updatedTasks = (ArrayList<Task>) evt.getNewValue();
+            applyFilterAndSort(); // Ruft unsere neue Kombi-Methode auf
+        }
+    }
 
-            // The Controller updates the View with the new state
-            view.updateTaskList(updatedTasks);
+
+    // Applies and updates the currently selected filter and sorting criteria
+    private void applyFilterAndSort() {
+        String statusFilter = (String) view.getFilterComboBox().getSelectedItem();
+        String assigneeFilter = (String) view.getAssigneeFilterComboBox().getSelectedItem();
+        String selectedSort = (String) view.getSortComboBox().getSelectedItem();
+
+        // 1. Get filtered list from model (using the new combined method)
+        ArrayList<Task> processedTasks = model.getFilteredTasks(statusFilter, assigneeFilter);
+
+        // 2. Sorting Logic (Deadline)
+        if ("Deadline".equals(selectedSort)) {
+            SimpleDateFormat format = new SimpleDateFormat("dd.MM.yyyy");
+            processedTasks.sort((t1, t2) -> {
+                if (t1.getDeadline().equals("None") && t2.getDeadline().equals("None")) return 0;
+                if (t1.getDeadline().equals("None")) return 1;
+                if (t2.getDeadline().equals("None")) return -1;
+                try {
+                    return format.parse(t1.getDeadline()).compareTo(format.parse(t2.getDeadline()));
+                } catch (Exception ex) { return 0; }
+            });
+        }
+
+        // 3. Update Assignee Filter Dropdown dynamically
+        java.util.Set<String> uniqueNames = new java.util.TreeSet<>();
+        for (Task t : model.getTasks()) {
+            String[] names = t.getAssignees().split(",");
+            for (String n : names) {
+                if (!n.trim().isEmpty()) uniqueNames.add(n.trim().toLowerCase());
+            }
+        }
+        view.updateAssigneeFilterList(uniqueNames);
+
+        // 4. Finally, send the processed results to the View
+        view.updateTaskList(processedTasks);
+    }
+
+
+    // Allows you to add a comment to an existing task.
+    private void handleAddComment() {
+        String titleToComment = JOptionPane.showInputDialog(view, "Enter the exact title of the task to comment on:");
+
+        if (titleToComment != null && !titleToComment.trim().isEmpty()) {
+            Task taskToComment = model.findTaskByTitle(titleToComment);
+
+            if (taskToComment != null) {
+                // Wir holen uns den Autor aus dem Assignee-Filter Dropdown als Vorschlag (Keep it simple)
+                String author = (String) view.getAssigneeFilterComboBox().getSelectedItem();
+                if (author.equals("All")) author = "User"; // Fallback
+
+                String commentText = JOptionPane.showInputDialog(view, "Enter your comment (Author: " + author + "):");
+
+                if (commentText != null && !commentText.trim().isEmpty()) {
+                    taskToComment.addComment(author, commentText);
+                    model.forceUpdateAndSave();
+                }
+            } else {
+                JOptionPane.showMessageDialog(view, "Task not found!", "Error", JOptionPane.ERROR_MESSAGE);
+            }
         }
     }
 }
