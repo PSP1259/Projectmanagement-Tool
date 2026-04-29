@@ -295,6 +295,7 @@ public class MainView extends JFrame {
         html.append(".time-warning { color: red; font-weight: bold; }");
         html.append(".status-open { color: blue; font-weight: bold; }");
         html.append(".status-done { color: green; font-weight: bold; }");
+        html.append(".assignee-pill { color: #FF5E00; background-color: transparent; border: 1px solid #FF5E00; padding: 2px 6px; font-size: 11px; font-weight: bold; margin-right: 4px; }");
         html.append(".comments-box { margin-left: 20px; margin-top: 5px; margin-bottom: 15px; padding: 5px; background-color: #f0f8ff; border-left: 3px solid #007bff; font-size: 12px; }");html.append(".comments-box { margin-left: 20px; margin-top: 10px; padding: 5px; background-color: #f9f9f9; border-left: 3px solid #007bff; font-size: 12px; }");
         html.append("hr { border: 0; border-top: 1px solid #ccc; margin-top: 5px; margin-bottom: 15px; }");
         html.append("</style></head><body>");
