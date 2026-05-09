@@ -31,12 +31,13 @@ public class MainView extends JFrame {
     private final JButton commentButton;
     private final JComboBox<String> assigneeComboBox;
     private final JComboBox<String> assigneeFilterComboBox;
+    private final JButton helpButton;
 
     public MainView() {
 
         // 1. Top-Level Container JFrame: initialize and define Layout
         setTitle("Projectmanagement-Tool");
-        setSize(700, 500);
+        setSize(1000, 750);
         setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
         setLayout(new BorderLayout());
 
@@ -131,6 +132,9 @@ public class MainView extends JFrame {
         commentButton = new JButton("Add Comment");
         buttonPanel.add(commentButton);
 
+        helpButton = new JButton("❓ Help / FAQ");
+        buttonPanel.add(helpButton);
+
         bottomPanel.add(inputPanel, BorderLayout.CENTER);
         bottomPanel.add(buttonPanel, BorderLayout.SOUTH);
 
@@ -179,6 +183,10 @@ public class MainView extends JFrame {
 
     public String getAssigneeInput() {
         return assigneeComboBox.getSelectedItem() != null ? assigneeComboBox.getSelectedItem().toString() : "";
+    }
+
+    public JButton getHelpButton() {
+        return helpButton;
     }
 
     public void addAssigneeToDropdown(String newAssignee) {

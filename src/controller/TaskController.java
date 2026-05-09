@@ -18,7 +18,6 @@ import java.util.Timer;
 import java.util.TimerTask;
 import java.util.Date;
 import java.text.SimpleDateFormat;
-import java.text.ParseException;
 
 /**
  * The TaskController handles the application startup and user interactions.
@@ -52,6 +51,7 @@ public class TaskController implements PropertyChangeListener {
         this.view.getSortComboBox().addActionListener(e -> applyFilterAndSort());
         this.view.getAssigneeFilterComboBox().addActionListener(e -> applyFilterAndSort());
         this.view.getCommentButton().addActionListener(e -> handleAddComment());
+        this.view.getHelpButton().addActionListener(e -> showHelpFAQ());
 
         // INITIAL LOAD LOGIC
         // 1. Load existing tasks from the XML file
@@ -371,5 +371,41 @@ public class TaskController implements PropertyChangeListener {
                 JOptionPane.showMessageDialog(view, "Task not found!", "Error", JOptionPane.ERROR_MESSAGE);
             }
         }
+    }
+
+    private void showHelpFAQ() {
+        // We use HTML to structure the FAQ into clear categories and bold text
+        StringBuilder faq = new StringBuilder();
+        faq.append("<html><body style='width: 400px; font-family: Arial, sans-serif;'>");
+        faq.append("<h2>🛠️ Tool Instructions & FAQ</h2>");
+
+        faq.append("<h3>📝 Task Creation & Editing</h3>");
+        faq.append("<ul>");
+        faq.append("<li><b>Mandatory Fields:</b> Only the <i>Title</i> is strictly required to create a task.</li>");
+        faq.append("<li><b>Deadlines:</b> Must be strictly formatted as <b>dd.mm.yyyy</b>.</li>");
+        faq.append("<li><b>Editing:</b> You can retroactively change the tracked time (in minutes) and the deadline using the Edit button.</li>");
+        faq.append("</ul>");
+
+        faq.append("<h3>👥 Assignees & Team Tags</h3>");
+        faq.append("<ul>");
+        faq.append("<li><b>Multiple Assignees:</b> You can assign multiple people by separating their names with a comma (e.g., <i>psp, adm, ceo</i>).</li>");
+        faq.append("<li><b>Visual Badges:</b> The tool automatically generates colored neon badges for each assigned individual.</li>");
+        faq.append("<li><b>Dynamic Filtering:</b> New assignees are automatically added to the dropdown filter at the top right.</li>");
+        faq.append("</ul>");
+
+        faq.append("<h3>⏱️ Time Tracking & Warnings</h3>");
+        faq.append("<ul>");
+        faq.append("<li><b>Overtime Warning:</b> Once the tracked time for a task exceeds <b>60 minutes</b>, the time indicator will automatically turn <span style='color: red; font-weight: bold;'>RED</span>.</li>");
+        faq.append("</ul>");
+
+        faq.append("<h3>💬 Communication</h3>");
+        faq.append("<ul>");
+        faq.append("<li><b>Comments:</b> Use 'Add Comment' to leave notes. Timestamps are generated automatically.</li>");
+        faq.append("</ul>");
+
+        faq.append("</body></html>");
+
+        // Show the dialog
+        JOptionPane.showMessageDialog(view, faq.toString(), "Help & FAQ", JOptionPane.INFORMATION_MESSAGE);
     }
 }
