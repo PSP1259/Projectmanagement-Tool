@@ -381,7 +381,7 @@ public class TaskController implements PropertyChangeListener {
                 JTextField commentField = new JTextField();
 
                 // Pre-fill the date field with the current system date
-                String currentDate = new java.text.SimpleDateFormat("dd.mm.yyyy").format(new java.util.Date());
+                String currentDate = new java.text.SimpleDateFormat("dd.MM.yyyy").format(new java.util.Date());
                 JTextField dateField = new JTextField(currentDate);
 
                 // Assemble the input dialog layout
