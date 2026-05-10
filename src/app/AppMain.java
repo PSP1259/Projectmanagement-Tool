@@ -1,3 +1,5 @@
+package app;
+
 import controller.TaskController;
 import model.ProjectModel;
 import view.MainView;
