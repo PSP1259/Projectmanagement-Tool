@@ -10,25 +10,31 @@ import java.util.ArrayList;
 import java.util.Properties;
 
 /**
- * Utility class to handle data persistence using java.util.Properties.
- * It saves and loads the Task list to/from a local XML file.
+ * Provides utility methods to handle data persistence using {@link Properties}.
+ * <p>
+ * This class is responsible for saving and loading the managed task list
+ * to and from a local XML file.
  */
-
 public class DataStorage {
 
-    // The file path where data will be stored, pointing to the 'data' directory
+    /** The file path pointing to the local directory where task data is persistently stored. */
     private static final String FILE_PATH = "data/tasks.xml";
 
     /**
-     * Saves a list of Tasks to an XML file using the Properties class.
+     * Saves a list of tasks to an XML file using the properties format.
+     * <p>
+     * This method iterates through the provided list, converts each task's
+     * attributes into sequential key-value pairs, and securely writes them
+     * to the designated storage file. If an I/O error occurs during the save
+     * process, it is caught and an error message is printed.
      *
-     * @param tasks The ArrayList of Tasks to save.
+     * @param tasks  the list of tasks to be saved, not null
      */
     public static void saveTasks(ArrayList<Task> tasks) {
 
         Properties props = new Properties();
 
-        // Convert the ArrayList into key-value pairs for the Properties object
+        // Convert the task list into sequential key-value pairs for the properties object
         for (int i = 0; i < tasks.size(); i++) {
             Task t = tasks.get(i);
             props.setProperty("task." + i + ".title", t.getTitle());
@@ -41,10 +47,10 @@ public class DataStorage {
             props.setProperty("task." + i + ".comments", t.getComments());
         }
 
-        // Save the total count
+        // Store the total count of tasks to facilitate the loading process later
         props.setProperty("task.count", String.valueOf(tasks.size()));
 
-        // Write to the XML file
+        // Persist the properties into the designated XML file securely
         try (FileOutputStream fos = new FileOutputStream(new File(FILE_PATH))) {
             props.storeToXML(fos, "Project Management Tool - Saved Tasks");
         } catch (IOException e) {
@@ -53,9 +59,13 @@ public class DataStorage {
     }
 
     /**
-     * Loads the list of Tasks from the XML file.
+     * Loads the persistently stored tasks from the local XML file.
+     * <p>
+     * This method reads the properties file and reconstructs the task objects
+     * sequentially, including their respective tracking metrics, dates, and comments.
+     * If the storage file does not yet exist, it safely defaults to returning an empty list.
      *
-     * @return An ArrayList containing the loaded Tasks. Returns an empty list if the file doesn't exist.
+     * @return  a new list containing the loaded tasks, or an empty list if no file exists, not null
      */
     public static ArrayList<Task> loadTasks() {
 
@@ -63,37 +73,32 @@ public class DataStorage {
         Properties props = new Properties();
         File file = new File(FILE_PATH);
 
-        // If the file doesn't exist yet -> return the empty list
+        // Safely return the empty list to prevent errors during the initial application startup
         if (!file.exists()) {
             return loadedTasks;
         }
 
-        // Read from the XML file
+        // Access the local storage and load the XML-formatted properties
         try (FileInputStream fis = new FileInputStream(file)) {
             props.loadFromXML(fis);
 
-            // Get the total count
+            // Extract the total count of saved tasks to define the reconstruction loop boundaries
             String countStr = props.getProperty("task.count", "0");
             int count = Integer.parseInt(countStr);
 
-            // Reconstruct the Task objects from the properties
+            // Reconstruct each task object iteratively with safe default fallbacks
             for (int i = 0; i < count; i++) {
                 String title = props.getProperty("task." + i + ".title", "Unknown");
                 String description = props.getProperty("task." + i + ".description", "");
                 String status = props.getProperty("task." + i + ".status", "Open");
 
-                // Time tracker
                 String timeStr = props.getProperty("task." + i + ".time", "0");
                 int time = Integer.parseInt(timeStr);
 
-                // Creation date and deadline
                 String creationDate = props.getProperty("task." + i + ".creationDate", "Unknown");
                 String deadline = props.getProperty("task." + i + ".deadline", "None");
 
-                // Assignees
                 String assignees = props.getProperty("task." + i + ".assignees", "");
-
-                // Comments
                 String comments = props.getProperty("task." + i + ".comments", "");
 
                 loadedTasks.add(new Task(title, description, status, time, creationDate, deadline, assignees, comments));
