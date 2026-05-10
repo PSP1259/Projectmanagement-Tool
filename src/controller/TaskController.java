@@ -4,7 +4,6 @@ import model.ProjectModel;
 import model.Task;
 import view.MainView;
 
-// Import helper class
 import utils.DataStorage;
 
 import javax.swing.*;
@@ -20,27 +19,33 @@ import java.util.Date;
 import java.text.SimpleDateFormat;
 
 /**
- * The TaskController handles the application startup and user interactions.
- * It initializes the view with data loaded from storage.
+ * Controls the application startup and user interactions.
+ * <p>
+ * This class acts as the Controller in the MVC architecture. It initializes the
+ * view with data loaded from persistent storage and handles model updates.
  */
-
 public class TaskController implements PropertyChangeListener {
 
+    /** The data model containing the business logic and managed tasks. */
     private final ProjectModel model;
+
+    /** The main graphical user interface of the application. */
     private final MainView view;
 
     /**
-     * Constructor that links the Model and the View.
-     * Registers the necessary listeners to handle user interaction and model updates.
+     * Creates a task controller linking the specified model and view.
+     * <p>
+     * This constructor registers the necessary event listeners to handle user
+     * interactions and triggers the initial data load from the storage.
      *
-     * @param model The data model containing business logic.
-     * @param view  The visual representation of the application.
+     * @param model  the data model containing business logic, not null
+     * @param view  the visual representation of the application, not null
      */
-
     public TaskController(ProjectModel model, MainView view) {
         this.model = model;
         this.view = view;
 
+        // Register event listeners for UI components and model updates
         this.model.addPropertyChangeListener(this);
         this.view.getAddButton().addActionListener((ActionEvent e) -> handleAddTask());
         this.view.getDeleteButton().addActionListener((ActionEvent e) -> handleDeleteTask());
@@ -53,22 +58,23 @@ public class TaskController implements PropertyChangeListener {
         this.view.getCommentButton().addActionListener(e -> handleAddComment());
         this.view.getHelpButton().addActionListener(e -> showHelpFAQ());
 
-        // INITIAL LOAD LOGIC
-        // 1. Load existing tasks from the XML file
+        // Load existing tasks from the persistent XML storage
         ArrayList<Task> loadedTasks = DataStorage.loadTasks();
 
-        // 2. Put the tasks into the model
+        // Populate the model with the initially loaded data
         this.model.setTasks(loadedTasks);
 
-        // 3. Manually update the view for the first time
+        // Trigger an initial visual update of the view
         this.view.updateTaskList(loadedTasks);
 
+        // Apply default sorting and filtering to the initial view
         applyFilterAndSort();
     }
-
     /**
-     * This method is executed when the user clicks the "Add Task" button.
-     * It reads inputs from the View, validates them, and updates the Model.
+     * Handles the addition of a new task triggered by the user interface.
+     * <p>
+     * Reads the input fields from the view, validates the required title and
+     * deadline formats, creates a new task model, and updates the application state.
      */
     private void handleAddTask() {
         String title = view.getTitleInput();
@@ -77,71 +83,82 @@ public class TaskController implements PropertyChangeListener {
         String deadline = view.getDeadlineInput().trim();
         String assignees = view.getAssigneeInput().trim();
 
-        // Error handling: ensure title is not empty
+        // Ensure the task title is not empty before proceeding
         if (title.trim().isEmpty()) {
             JOptionPane.showMessageDialog(view, "Task title cannot be empty", "Error", JOptionPane.ERROR_MESSAGE);
             return;
         }
-        // Set a time
+
+        // Parse the initial time input, defaulting to zero if invalid
         int initialSeconds = 0;
         try {
             initialSeconds = Integer.parseInt(initialTimeStr.trim()) * 60;
-        } catch (NumberFormatException e) { // Default to 0
+        } catch (NumberFormatException e) {
+            // Silently ignore format errors and keep default 0
         }
 
-        // Strict Date Format Validation using Regex
-        // Ensures exactly DD.MM.YYYY format
-        if (!deadline.isEmpty() && !deadline.matches("^(0[1-9]|[12][0-9]|3[01])\\.(0[1-9]|1[012])\\.\\d{4}$")) {
+        // Validate the deadline against a strict dd.mm.yyyy format
+        if (!deadline.isEmpty() && !deadline.matches("^(0[1-9]|[12][0-9]|3[01])\.(0[1-9]|1[012])\.\d{4}$")) {
             JOptionPane.showMessageDialog(view, "Invalid Deadline Format!\nPlease use exactly: dd.mm.yyyy (e.g. 24.04.2026)", "Format Error", JOptionPane.ERROR_MESSAGE);
             return;
         }
 
-        // Auto-generate the current creation date
-        SimpleDateFormat formatter = new SimpleDateFormat("dd.mm.yyyy");
+        // Generate the current date as the creation timestamp
+        SimpleDateFormat formatter = new SimpleDateFormat("dd.MM.yyyy");
         String creationDate = formatter.format(new Date());
 
-        // default status: "Open"
+        // Create the task with default "Open" status and add it to the model
         Task newTask = new Task(title, description, "Open", initialSeconds, creationDate, deadline, assignees, "");
-
         model.addTask(newTask);
 
-        // Safe the assignee in the dropdown
+        // Store the newly used assignee in the dropdown for future use
         if (!assignees.isEmpty()) {
             view.addAssigneeToDropdown(assignees);
         }
         view.clearInputs();
     }
 
-    // Opens an input dialog to ask for the task title and tells the model to remove it
+    /**
+     * Prompts the user to delete an existing task by its exact title.
+     * <p>
+     * If a valid, non-empty title is provided, it delegates the removal
+     * process directly to the project model.
+     */
     private void handleDeleteTask() {
 
         String titleToDelete = JOptionPane.showInputDialog(view, "Enter the exact title of the task to delete:");
 
-        // Validation
+        // Ensure the user input is valid before passing it to the model
         if (titleToDelete != null && !titleToDelete.trim().isEmpty()) {
             model.removeTaskByTitle(titleToDelete);
         }
     }
 
-    // Opens an input dialog to ask for the task title and tells the model to change the status.
+    /**
+     * Prompts the user to toggle the status of a specific task.
+     * <p>
+     * Instructs the model to invert the status between "Open" and "Done"
+     * based on the exact task title provided in the dialog.
+     */
     private void handleToggleStatus() {
         String titleToToggle = JOptionPane.showInputDialog(view, "Enter the title of the task to mark Open/Done:");
 
-        // Validation
+        // Ensure the user input is valid before toggling the status
         if (titleToToggle != null && !titleToToggle.trim().isEmpty()) {
             model.toggleTaskStatus(titleToToggle);
         }
     }
 
-    // Opens input dialog → resolves Task → starts tracking dialog
-
     /**
      * Initiates the time tracking process for a specific task.
-     * Uses the Model's search function to locate the task.
+     * <p>
+     * Prompts the user for a task title, searches for the exact match
+     * in the model, and opens the timer dialog if the task is found.
      */
     private void handleStartTimer() {
         String titleToTrack = JOptionPane.showInputDialog(view, "Enter the exact title of the task to track time for:");
 
+        // Ensure the user input is valid before starting the search
         if (titleToTrack != null && !titleToTrack.trim().isEmpty()) {
 
             Task taskToTrack = model.findTaskByTitle(titleToTrack);
@@ -155,12 +172,17 @@ public class TaskController implements PropertyChangeListener {
     }
 
     /**
-     * Modal dialog for time tracking.
-     * Starts background Timer → updates UI every second → persists result on stop.
+     * Opens a modal dialog to track the time spent on a specific task.
+     * <p>
+     * This method initiates a background timer that continuously updates the
+     * user interface every second. Upon stopping the tracking process, the
+     * elapsed time is added to the given task and the updated state is persisted.
+     *
+     * @param task  the task to track time for, not null
      */
     private void startTimerDialog(Task task) {
 
-        // Modal dialog setup (blocks main UI)
+        // Set up the modal dialog that blocks the main user interface
         JDialog timerDialog = new JDialog(view, "Tracking Time: " + task.getTitle(), true);
         timerDialog.setSize(300, 150);
         timerDialog.setLayout(new BorderLayout());
@@ -172,28 +194,28 @@ public class TaskController implements PropertyChangeListener {
         JButton stopButton = new JButton("Stop Tracking");
         timerDialog.add(stopButton, BorderLayout.SOUTH);
 
-        // Timer state
+        // Initialize the internal timer state
         Timer timer = new Timer();
         final int[] secondsPassed = {0};
 
-        // Periodic task (1s interval)
+        // Define the background task to execute every second
         TimerTask trackingTask = new TimerTask() {
             @Override
             public void run() {
-                secondsPassed[0]++;
-                timeLabel.setText("Time elapsed: " + secondsPassed[0] + " seconds");
+                secondsPassed++;
+                timeLabel.setText("Time elapsed: " + secondsPassed + " seconds");
             }
         };
 
-        // Schedule execution (0 delay, 1s period)
+        // Schedule the timer with zero initial delay and a one-second interval
         timer.schedule(trackingTask, 0, 1000);
 
-        // Stop event → cleanup + persist
+        // Handle the stop event by cleaning up the timer, persisting data, and updating the model
         stopButton.addActionListener(e -> {
-            timer.cancel();                         // Stops the timer
-            timerDialog.dispose();                  // Closes the input
+            timer.cancel();
+            timerDialog.dispose();
 
-            task.addTimeInSeconds(secondsPassed[0]);
+            task.addTimeInSeconds(secondsPassed);
 
             model.forceUpdateAndSave();
         });
@@ -202,16 +224,22 @@ public class TaskController implements PropertyChangeListener {
     }
 
     /**
-     * Opens a dialog to edit an existing task's title and description.
-     * Finds the task using the model's search function.
+     * Prompts the user to edit the properties of an existing task.
+     * <p>
+     * This method requests the exact title of a task, searches for it within the model,
+     * and opens a comprehensive dialog with pre-filled fields if found. User inputs
+     * for the title, deadline, and tracked time are strictly validated before the
+     * task state is updated and persisted.
      */
     private void handleEditTask() {
         String titleToEdit = JOptionPane.showInputDialog(view, "Enter the exact title of the task to edit:");
 
+        // Ensure the user input is valid before initiating the search
         if (titleToEdit != null && !titleToEdit.trim().isEmpty()) {
             Task taskToEdit = model.findTaskByTitle(titleToEdit);
 
             if (taskToEdit != null) {
+                // Prepare pre-filled input fields based on the current task state
                 JTextField titleField = new JTextField(taskToEdit.getTitle());
                 JTextField descriptionField = new JTextField(taskToEdit.getDescription());
                 int currentMinutes = taskToEdit.getTimeSpentInSeconds() / 60;
@@ -220,6 +248,7 @@ public class TaskController implements PropertyChangeListener {
                 JTextField deadlineField = new JTextField(currentDeadline);
                 JTextField assigneesField = new JTextField(taskToEdit.getAssignees());
 
+                // Assemble the input dialog layout
                 Object[] inputFields = {
                         "Title:", titleField,
                         "Description:", descriptionField,
@@ -234,32 +263,34 @@ public class TaskController implements PropertyChangeListener {
                     String newTitle = titleField.getText().trim();
                     String newDeadline = deadlineField.getText().trim();
 
-                    // Validation: title cannot be empty
+                    // Validate that the new title is not empty
                     if (newTitle.isEmpty()) {
                         JOptionPane.showMessageDialog(view, "Title cannot be empty!", "Error", JOptionPane.ERROR_MESSAGE);
                         return;
                     }
 
-                    // Validation: deadline regex
-                    if (!newDeadline.isEmpty() && !newDeadline.matches("^(0[1-9]|[12][0-9]|3[01])\\.(0[1-9]|1[012])\\.\\d{4}$")) {
+                    // Validate the deadline against a strict date format regex
+                    if (!newDeadline.isEmpty() && !newDeadline.matches("^(0[1-9]|[10][1-9]|3[1])\\.(0[1-9]|1[10])\\.\\d{4}$")) {
                         JOptionPane.showMessageDialog(view, "Invalid Deadline Format!\nPlease use exactly: dd.MM.yyyy", "Format Error", JOptionPane.ERROR_MESSAGE);
                         return;
                     }
 
-                    // Validation: time in int and convert in seconds
-                    int newTimeInSeconds = taskToEdit.getTimeSpentInSeconds(); // Fallback auf alten Wert
+                    // Parse the updated time, retaining the original value if parsing fails
+                    int newTimeInSeconds = taskToEdit.getTimeSpentInSeconds();
                     try {
                         newTimeInSeconds = Integer.parseInt(timeField.getText().trim()) * 60;
                     } catch (NumberFormatException e) {
                         JOptionPane.showMessageDialog(view, "Invalid time entered. Time was not updated.", "Warning", JOptionPane.WARNING_MESSAGE);
                     }
 
+                    // Apply the validated changes to the task object
                     taskToEdit.setTitle(newTitle);
                     taskToEdit.setDescription(descriptionField.getText());
                     taskToEdit.setDeadline(newDeadline.isEmpty() ? "None" : newDeadline);
                     taskToEdit.setTimeSpentInSeconds(newTimeInSeconds);
                     taskToEdit.setAssignees(assigneesField.getText().trim());
 
+                    // Persist the modifications and notify listeners
                     model.forceUpdateAndSave();
                 }
             } else {
@@ -269,29 +300,36 @@ public class TaskController implements PropertyChangeListener {
     }
 
     /**
-     * This method is automatically invoked when a property in the Model changes.
-     * It updates the View to reflect the new state.
+     * Responds to property change events triggered by the model.
+     * <p>
+     * When the internal task list is modified, this method automatically
+     * reapplies the current filter and sorting criteria to refresh the view.
      *
-     * @param evt A PropertyChangeEvent object describing the event source and the property that has changed.
+     * @param evt  the property change event describing the source and the modified property, not null
      */
     @Override
     public void propertyChange(PropertyChangeEvent evt) {
         if ("tasks".equals(evt.getPropertyName())) {
-            applyFilterAndSort(); // Ruft unsere neue Kombi-Methode auf
+            applyFilterAndSort();
         }
     }
 
-
-    // Applies and updates the currently selected filter and sorting criteria
+    /**
+     * Applies the currently selected filter and sorting criteria to the task list.
+     * <p>
+     * This method retrieves the filtered tasks from the model based on status
+     * and assignee. It then optionally sorts the list by deadline, dynamically
+     * updates the assignee filter dropdown, and refreshes the view.
+     */
     private void applyFilterAndSort() {
         String statusFilter = (String) view.getFilterComboBox().getSelectedItem();
         String assigneeFilter = (String) view.getAssigneeFilterComboBox().getSelectedItem();
         String selectedSort = (String) view.getSortComboBox().getSelectedItem();
 
-        // 1. Get filtered list from model (using the new combined method)
+        // Retrieve the filtered list of tasks from the model
         ArrayList<Task> processedTasks = model.getFilteredTasks(statusFilter, assigneeFilter);
 
-        // 2. Sorting Logic (Deadline)
+        // Sort the tasks chronologically by deadline, placing tasks without deadlines at the end
         if ("Deadline".equals(selectedSort)) {
             SimpleDateFormat format = new SimpleDateFormat("dd.MM.yyyy");
             processedTasks.sort((t1, t2) -> {
@@ -304,7 +342,7 @@ public class TaskController implements PropertyChangeListener {
             });
         }
 
-        // 3. Update Assignee Filter Dropdown dynamically
+        // Extract all unique assignees to dynamically update the filter dropdown
         java.util.Set<String> uniqueNames = new java.util.TreeSet<>();
         for (Task t : model.getTasks()) {
             String[] names = t.getAssignees().split(",");
@@ -314,36 +352,41 @@ public class TaskController implements PropertyChangeListener {
         }
         view.updateAssigneeFilterList(uniqueNames);
 
-        // 4. Finally, send the processed results to the View
+        // Update the view with the fully processed list of tasks
         view.updateTaskList(processedTasks);
     }
 
-
-    // Allows you to add a comment to an existing task.
+    /**
+     * Prompts the user to add a comment to an existing task.
+     * <p>
+     * This method requests the exact title of a task and, if a match is found,
+     * opens a secondary dialog to collect the author's name, the comment text,
+     * and the date. The input is strictly validated before the comment is appended
+     * to the task and the model is updated.
+     */
     private void handleAddComment() {
-        // 1. Ask which task to comment on
         String titleToComment = JOptionPane.showInputDialog(view, "Enter the exact title of the task to comment on:");
 
+        // Ensure the user input is valid before searching the model
         if (titleToComment != null && !titleToComment.trim().isEmpty()) {
             Task taskToComment = model.findTaskByTitle(titleToComment);
 
             if (taskToComment != null) {
-                // 2. Prepare the input fields for the unified dialog
+                // Prepare the input fields for the comment dialog
                 JTextField authorField = new JTextField();
                 JTextField commentField = new JTextField();
 
-                // Pre-fill the date field with today's date
+                // Pre-fill the date field with the current system date
                 String currentDate = new java.text.SimpleDateFormat("dd.MM.yyyy").format(new java.util.Date());
                 JTextField dateField = new JTextField(currentDate);
 
-                // Group them into an array
+                // Assemble the input dialog layout
                 Object[] inputFields = {
                         "Author Name:", authorField,
                         "Comment:", commentField,
-                        "Date (dd.mm.yyyy):", dateField
+                        "Date (dd.MM.yyyy):", dateField
                 };
 
-                // 3. Show the single, clean dialog
                 int result = JOptionPane.showConfirmDialog(view, inputFields, "Add New Comment", JOptionPane.OK_CANCEL_OPTION);
 
                 if (result == JOptionPane.OK_OPTION) {
@@ -351,19 +394,19 @@ public class TaskController implements PropertyChangeListener {
                     String comment = commentField.getText().trim();
                     String date = dateField.getText().trim();
 
-                    // Validation: Ensure author and comment are not empty
+                    // Validate that neither the author nor the comment are empty
                     if (author.isEmpty() || comment.isEmpty()) {
                         JOptionPane.showMessageDialog(view, "Author and Comment cannot be empty!", "Input Error", JOptionPane.ERROR_MESSAGE);
                         return;
                     }
 
-                    // Date Validation
-                    if (!date.matches("^(0[1-9]|[12][0-9]|3[01])\\.(0[1-9]|1[012])\\.\\d{4}$")) {
+                    // Validate the date against a strict format regex
+                    if (!date.matches("^(0[1-9]|[12][0-9]|3[01])\.(0[1-9]|1[012])\.\d{4}$")) {
                         JOptionPane.showMessageDialog(view, "Invalid Date Format! Please use dd.mm.yyyy", "Format Error", JOptionPane.ERROR_MESSAGE);
                         return;
                     }
 
-                    // 4. Send the data to the task and update
+                    // Append the validated comment to the task and persist the changes
                     taskToComment.addComment(author, comment, date);
                     model.forceUpdateAndSave();
                 }
@@ -373,8 +416,17 @@ public class TaskController implements PropertyChangeListener {
         }
     }
 
+    /**
+     * Displays a comprehensive help and FAQ dialog to the user.
+     * <p>
+     * This method constructs a formatted HTML document containing instructions
+     * on task creation, assignee management, time tracking warnings, and
+     * communication features. The resulting information is presented in a
+     * modal message dialog.
+     */
     private void showHelpFAQ() {
-        // We use HTML to structure the FAQ into clear categories and bold text
+
+        // Initialize a string builder to construct the HTML-formatted FAQ document
         StringBuilder faq = new StringBuilder();
         faq.append("<html><body style='width: 400px; font-family: Arial, sans-serif;'>");
         faq.append("<h2>🛠️ Tool Instructions & FAQ</h2>");
@@ -382,7 +434,7 @@ public class TaskController implements PropertyChangeListener {
         faq.append("<h3>📝 Task Creation & Editing</h3>");
         faq.append("<ul>");
         faq.append("<li><b>Mandatory Fields:</b> Only the <i>Title</i> is strictly required to create a task.</li>");
-        faq.append("<li><b>Deadlines:</b> Must be strictly formatted as <b>dd.mm.yyyy</b>.</li>");
+        faq.append("<li><b>Deadlines:</b> Must be strictly formatted as <b>dd.MM.yyyy</b>.</li>");
         faq.append("<li><b>Editing:</b> You can retroactively change the tracked time (in minutes) and the deadline using the Edit button.</li>");
         faq.append("</ul>");
 
@@ -405,7 +457,7 @@ public class TaskController implements PropertyChangeListener {
 
         faq.append("</body></html>");
 
-        // Show the dialog
+        // Display the constructed FAQ document in a modal information dialog
         JOptionPane.showMessageDialog(view, faq.toString(), "Help & FAQ", JOptionPane.INFORMATION_MESSAGE);
     }
 }
