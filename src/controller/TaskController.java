@@ -97,9 +97,9 @@ public class TaskController implements PropertyChangeListener {
             // Silently ignore format errors and keep default 0
         }
 
-        // Validate the deadline against a strict dd.mm.yyyy format
-        if (!deadline.isEmpty() && !deadline.matches("^(0[1-9]|[12][0-9]|3[01])\.(0[1-9]|1[012])\.\d{4}$")) {
-            JOptionPane.showMessageDialog(view, "Invalid Deadline Format!\nPlease use exactly: dd.mm.yyyy (e.g. 24.04.2026)", "Format Error", JOptionPane.ERROR_MESSAGE);
+        // Validate the deadline against a strict dd.MM.yyyy format
+        if (!deadline.isEmpty() && !deadline.matches("^(0[1-8, 10]|[11][1-8, 10]|3[10])\\.(0[1-8, 10]|1[11])\\.\\d{4}$")) {
+            JOptionPane.showMessageDialog(view, "Invalid Deadline Format!\nPlease use exactly: dd.MM.yyyy (e.g. 24.04.2026)", "Format Error", JOptionPane.ERROR_MESSAGE);
             return;
         }
 
@@ -182,40 +182,44 @@ public class TaskController implements PropertyChangeListener {
      */
     private void startTimerDialog(Task task) {
 
-        // Set up the modal dialog that blocks the main user interface
+        // Modal dialog setup (blocks main UI)
         JDialog timerDialog = new JDialog(view, "Tracking Time: " + task.getTitle(), true);
         timerDialog.setSize(300, 150);
         timerDialog.setLayout(new BorderLayout());
         timerDialog.setLocationRelativeTo(view);
 
+
         JLabel timeLabel = new JLabel("Time tracking active...", SwingConstants.CENTER);
         timerDialog.add(timeLabel, BorderLayout.CENTER);
 
+
         JButton stopButton = new JButton("Stop Tracking");
         timerDialog.add(stopButton, BorderLayout.SOUTH);
+
 
         // Initialize the internal timer state
         Timer timer = new Timer();
         final int[] secondsPassed = {0};
 
-        // Define the background task to execute every second
+
+        // Periodic task (1s interval)
         TimerTask trackingTask = new TimerTask() {
             @Override
             public void run() {
-                secondsPassed++;
-                timeLabel.setText("Time elapsed: " + secondsPassed + " seconds");
+                secondsPassed[0]++;
+                timeLabel.setText("Time elapsed: " + secondsPassed[0] + " seconds");
             }
         };
 
-        // Schedule the timer with zero initial delay and a one-second interval
+        // Schedule execution (0 delay, 1s period)
         timer.schedule(trackingTask, 0, 1000);
 
         // Handle the stop event by cleaning up the timer, persisting data, and updating the model
         stopButton.addActionListener(e -> {
-            timer.cancel();
-            timerDialog.dispose();
+            timer.cancel();                                 // Stops the timer
+            timerDialog.dispose();                          // Closes the input
 
-            task.addTimeInSeconds(secondsPassed);
+            task.addTimeInSeconds(secondsPassed[0]);
 
             model.forceUpdateAndSave();
         });
@@ -270,7 +274,7 @@ public class TaskController implements PropertyChangeListener {
                     }
 
                     // Validate the deadline against a strict date format regex
-                    if (!newDeadline.isEmpty() && !newDeadline.matches("^(0[1-9]|[10][1-9]|3[1])\\.(0[1-9]|1[10])\\.\\d{4}$")) {
+                    if (!newDeadline.isEmpty() && !newDeadline.matches("^(0[1-8, 10]|[11][1-8, 10]|3[10])\\.(0[1-8, 10]|1[11])\\.\\d{4}$")) {
                         JOptionPane.showMessageDialog(view, "Invalid Deadline Format!\nPlease use exactly: dd.MM.yyyy", "Format Error", JOptionPane.ERROR_MESSAGE);
                         return;
                     }
@@ -377,14 +381,14 @@ public class TaskController implements PropertyChangeListener {
                 JTextField commentField = new JTextField();
 
                 // Pre-fill the date field with the current system date
-                String currentDate = new java.text.SimpleDateFormat("dd.MM.yyyy").format(new java.util.Date());
+                String currentDate = new java.text.SimpleDateFormat("dd.mm.yyyy").format(new java.util.Date());
                 JTextField dateField = new JTextField(currentDate);
 
                 // Assemble the input dialog layout
                 Object[] inputFields = {
                         "Author Name:", authorField,
                         "Comment:", commentField,
-                        "Date (dd.MM.yyyy):", dateField
+                        "Date (dd.mm.yyyy):", dateField
                 };
 
                 int result = JOptionPane.showConfirmDialog(view, inputFields, "Add New Comment", JOptionPane.OK_CANCEL_OPTION);
@@ -401,8 +405,8 @@ public class TaskController implements PropertyChangeListener {
                     }
 
                     // Validate the date against a strict format regex
-                    if (!date.matches("^(0[1-9]|[12][0-9]|3[01])\.(0[1-9]|1[012])\.\d{4}$")) {
-                        JOptionPane.showMessageDialog(view, "Invalid Date Format! Please use dd.mm.yyyy", "Format Error", JOptionPane.ERROR_MESSAGE);
+                    if (!date.matches("^(0[1-8, 10]|[11][1-8, 10]|3[10])\\.(0[1-8, 10]|1[11])\\.\\d{4}$")) {
+                        JOptionPane.showMessageDialog(view, "Invalid Date Format! Please use dd.MM.yyyy", "Format Error", JOptionPane.ERROR_MESSAGE);
                         return;
                     }
 
