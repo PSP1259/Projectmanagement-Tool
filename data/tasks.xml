@@ -1,0 +1,30 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE properties SYSTEM "http://java.sun.com/dtd/properties.dtd">
+<properties>
+    <comment>Project Management Tool - Demo Entries</comment>
+    <entry key="task.count">3</entry>
+    <entry key="task.0.title">Fix NullPointerException in MainView</entry>
+    <entry key="task.0.description">The application crashes when a user clicks the Help button before the UI is fully rendered. Needs a quick fix before the presentation!</entry>
+    <entry key="task.0.status">Open</entry>
+    <entry key="task.0.time">1811</entry>
+    <entry key="task.0.creationDate">08.05.2026</entry>
+    <entry key="task.0.deadline">12.05.2026</entry>
+    <entry key="task.0.assignees">dev, psp</entry>
+    <entry key="task.0.comments">&#x1f4ac; &lt;b&gt;dev&lt;/b&gt; &lt;i&gt;(09.05.2026)&lt;/i&gt;: I swear it worked perfectly on my machine...&lt;br&gt;&#x1f4ac; &lt;b&gt;psp&lt;/b&gt; &lt;i&gt;(10.05.2026)&lt;/i&gt;: You forgot to initialize the button. &lt;br&gt;</entry>
+    <entry key="task.1.title">Implement MVC Architecture</entry>
+    <entry key="task.1.description">Refactor the spaghetti code into a clean Model-View-Controller pattern. Professor Shao J&#xfc; Woo will be checking the Object Orientation strictly!</entry>
+    <entry key="task.1.status">Done</entry>
+    <entry key="task.1.time">5461</entry>
+    <entry key="task.1.creationDate">01.05.2026</entry>
+    <entry key="task.1.deadline">10.05.2026</entry>
+    <entry key="task.1.assignees">psp, adm</entry>
+    <entry key="task.1.comments">&#x1f4ac; &lt;b&gt;adm&lt;/b&gt; &lt;i&gt;(03.05.2026)&lt;/i&gt;: Are we sure we really need MVC for this? It's getting complicated.&lt;br&gt;&#x1f4ac; &lt;b&gt;psp&lt;/b&gt; &lt;i&gt;(05.05.2026)&lt;/i&gt;: Yes, unless you want to lose 10% on the grading criteria! Let's get it done.&lt;br&gt;</entry>
+    <entry key="task.2.title">Emergency Coffee Run</entry>
+    <entry key="task.2.description">The dev team is running out of caffeine.</entry>
+    <entry key="task.2.status">Open</entry>
+    <entry key="task.2.time">384</entry>
+    <entry key="task.2.creationDate">10.05.2026</entry>
+    <entry key="task.2.deadline">10.05.2026</entry>
+    <entry key="task.2.assignees">adm</entry>
+    <entry key="task.2.comments">&#x1f4ac; &lt;b&gt;adm&lt;/b&gt; &lt;i&gt;(10.05.2026)&lt;/i&gt;: On my way. Do we need snacks too?&lt;br&gt;&#x1f4ac; &lt;b&gt;dev&lt;/b&gt; &lt;i&gt;(10.05.2026)&lt;/i&gt;: Bring pizza or don't come back.&lt;br&gt;</entry>
+</properties>
