@@ -5,29 +5,38 @@ import view.MainView;
 import javax.swing.SwingUtilities;
 
 /**
- * The main entry point for the Project Management Tool.
- * It initializes the MVC components and ensures the GUI is created safely.
+ * Serves as the main entry point for the project management tool.
+ * <p>
+ * This class is responsible for initializing the Model-View-Controller (MVC)
+ * architecture and ensuring that the graphical user interface is constructed
+ * safely on the Event Dispatch Thread.
  */
-
 public class AppMain {
 
+    /**
+     * Launches the application by instantiating the core MVC components.
+     * <p>
+     * To adhere to Java Swing threading rules, the user interface assembly
+     * and startup process are wrapped within a lambda expression executed
+     * asynchronously by the Swing application framework.
+     *
+     * @param args  the command line arguments, not null but generally ignored
+     */
     public static void main(String[] args) {
 
-        // Safety practice in Java Swing, using a Lambda expression.
+        // Ensure GUI creation is safely executed on the Event Dispatch Thread
         SwingUtilities.invokeLater(() -> {
 
-            // 1. Create the Model (Data)
+            // Instantiate the data model containing the core business logic
             ProjectModel model = new ProjectModel();
 
-            // 2. Create the View (GUI)
+            // Instantiate the primary graphical user interface
             MainView view = new MainView();
 
-            // 3. Create the Controller (Brain) and wire them together
-            // The Controller links the Model and View internally
+            // Initialize the controller to wire the model and view together
             new TaskController(model, view);
 
-            // 4. Make the window visible
-            // Centers the window on the screen and shows it
+            // Center the application window on the screen and display it
             view.setLocationRelativeTo(null);
             view.setVisible(true);
         });
