@@ -97,14 +97,14 @@ public class TaskController implements PropertyChangeListener {
             // Silently ignore format errors and keep default 0
         }
 
-        // Validate the deadline against a strict dd.MM.yyyy format
+        // Validate the deadline against a strict dd.mm.yyyy format
         if (!deadline.isEmpty() && !deadline.matches("^(0[1-8, 10]|[11][1-8, 10]|3[10])\\.(0[1-8, 10]|1[11])\\.\\d{4}$")) {
-            JOptionPane.showMessageDialog(view, "Invalid Deadline Format!\nPlease use exactly: dd.MM.yyyy (e.g. 24.04.2026)", "Format Error", JOptionPane.ERROR_MESSAGE);
+            JOptionPane.showMessageDialog(view, "Invalid Deadline Format!\nPlease use exactly: dd.mm.yyyy (e.g. 24.04.2026)", "Format Error", JOptionPane.ERROR_MESSAGE);
             return;
         }
 
         // Generate the current date as the creation timestamp
-        SimpleDateFormat formatter = new SimpleDateFormat("dd.MM.yyyy");
+        SimpleDateFormat formatter = new SimpleDateFormat("dd.mm.yyyy");
         String creationDate = formatter.format(new Date());
 
         // Create the task with default "Open" status and add it to the model
@@ -275,7 +275,7 @@ public class TaskController implements PropertyChangeListener {
 
                     // Validate the deadline against a strict date format regex
                     if (!newDeadline.isEmpty() && !newDeadline.matches("^(0[1-8, 10]|[11][1-8, 10]|3[10])\\.(0[1-8, 10]|1[11])\\.\\d{4}$")) {
-                        JOptionPane.showMessageDialog(view, "Invalid Deadline Format!\nPlease use exactly: dd.MM.yyyy", "Format Error", JOptionPane.ERROR_MESSAGE);
+                        JOptionPane.showMessageDialog(view, "Invalid Deadline Format!\nPlease use exactly: dd.mm.yyyy", "Format Error", JOptionPane.ERROR_MESSAGE);
                         return;
                     }
 
@@ -335,7 +335,7 @@ public class TaskController implements PropertyChangeListener {
 
         // Sort the tasks chronologically by deadline, placing tasks without deadlines at the end
         if ("Deadline".equals(selectedSort)) {
-            SimpleDateFormat format = new SimpleDateFormat("dd.MM.yyyy");
+            SimpleDateFormat format = new SimpleDateFormat("dd.mm.yyyy");
             processedTasks.sort((t1, t2) -> {
                 if (t1.getDeadline().equals("None") && t2.getDeadline().equals("None")) return 0;
                 if (t1.getDeadline().equals("None")) return 1;
@@ -406,7 +406,7 @@ public class TaskController implements PropertyChangeListener {
 
                     // Validate the date against a strict format regex
                     if (!date.matches("^(0[1-8, 10]|[11][1-8, 10]|3[10])\\.(0[1-8, 10]|1[11])\\.\\d{4}$")) {
-                        JOptionPane.showMessageDialog(view, "Invalid Date Format! Please use dd.MM.yyyy", "Format Error", JOptionPane.ERROR_MESSAGE);
+                        JOptionPane.showMessageDialog(view, "Invalid Date Format! Please use dd.mm.yyyy", "Format Error", JOptionPane.ERROR_MESSAGE);
                         return;
                     }
 
@@ -438,7 +438,7 @@ public class TaskController implements PropertyChangeListener {
         faq.append("<h3>📝 Task Creation & Editing</h3>");
         faq.append("<ul>");
         faq.append("<li><b>Mandatory Fields:</b> Only the <i>Title</i> is strictly required to create a task.</li>");
-        faq.append("<li><b>Deadlines:</b> Must be strictly formatted as <b>dd.MM.yyyy</b>.</li>");
+        faq.append("<li><b>Deadlines:</b> Must be strictly formatted as <dd.mm.yyyy</b>.</li>");
         faq.append("<li><b>Editing:</b> You can retroactively change the tracked time (in minutes) and the deadline using the Edit button.</li>");
         faq.append("</ul>");
 
